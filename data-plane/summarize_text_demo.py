@@ -14,12 +14,13 @@
 ##########################################################################
 
 import oci
+import yaml
 
-# Setup basic variables
-# Auth Config
-# TODO: Please update config profile name and use the compartmentId that has policies grant permissions for using Generative AI Service
-compartment_id = "<compartment_ocid>"
-CONFIG_PROFILE = "DEFAULT"
+with open('config.yaml', 'r') as file:
+    config_data = yaml.safe_load(file)
+
+compartment_id = config_data['compartment_id']
+CONFIG_PROFILE = config_data['config_profile']
 config = oci.config.from_file('~/.oci/config', CONFIG_PROFILE)
 
 # Service endpoint
@@ -27,11 +28,18 @@ endpoint = "https://generativeai.aiservice.us-chicago-1.oci.oraclecloud.com"
 
 generative_ai_client = oci.generative_ai.GenerativeAiClient(config=config, service_endpoint=endpoint, retry_strategy=oci.retry.NoneRetryStrategy(), timeout=(10,240))
 
-text_to_summarize = "Quantum dots (QDs) - also called semiconductor nanocrystals, are semiconductor particles a few nanometres in size, having optical and electronic properties that differ from those of larger particles as a result of quantum mechanics. They are a central topic in nanotechnology and materials science. When the quantum dots are illuminated by UV light, an electron in the quantum dot can be excited to a state of higher energy. In the case of a semiconducting quantum dot, this process corresponds to the transition of an electron from the valence band to the conductance band. The excited electron can drop back into the valence band releasing its energy as light. This light emission (photoluminescence) is illustrated in the figure on the right. The color of that light depends on the energy difference between the conductance band and the valence band, or the transition between discrete energy states when the band structure is no longer well-defined in QDs."
+with open('files/summarize_data.txt', 'r') as file:
+    text_to_summarize = file.read()
+
 summarize_text_detail = oci.generative_ai.models.SummarizeTextDetails()
 summarize_text_detail.serving_mode = oci.generative_ai.models.OnDemandServingMode(model_id="cohere.command")
 summarize_text_detail.compartment_id = compartment_id
 summarize_text_detail.input = text_to_summarize
+summarize_text_detail.additional_command = "Generate a teaser post for this article. Share an interesting insight to captivate attention."
+summarize_text_detail.extractiveness = "AUTO" # HIGH, LOW
+summarize_text_detail.format = "AUTO" # brackets, paragraph
+summarize_text_detail.length = "LONG" # high, AUTO
+summarize_text_detail.temperature = .3 # [0,1]
 
 if "<compartment_ocid>" in compartment_id:
     print("ERROR:Please update your compartment id in target python file")

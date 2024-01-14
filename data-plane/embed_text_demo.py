@@ -14,12 +14,18 @@
 ##########################################################################
 
 import oci
+import logging
+import yaml
 
-# Setup basic variables
-# Auth Config
-# TODO: Please update config profile name and use the compartmentId that has policies grant permissions for using Generative AI Service
-compartment_id = "ocid1.compartment.oc1..aaaaaaaauyfykbiauv4nntvl3b57ydx3wcrqsnax7bbbvhov4vmdvqo2nqca"
-CONFIG_PROFILE = "DEFAULT"
+# Enable debug logging
+logging.getLogger('oci').setLevel(logging.DEBUG)
+
+
+with open('config.yaml', 'r') as file:
+    config_data = yaml.safe_load(file)
+
+compartment_id = config_data['compartment_id']
+CONFIG_PROFILE = config_data['config_profile']
 config = oci.config.from_file('~/.oci/config', CONFIG_PROFILE)
 
 # Service endpoint

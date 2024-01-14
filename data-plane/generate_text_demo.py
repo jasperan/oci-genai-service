@@ -13,12 +13,14 @@
 # python generate_text_demo.py
 ##########################################################################
 import oci
+import yaml
+import json
 
-# Setup basic variables
-# Auth Config
-# TODO: Please update config profile name and use the compartmentId that has policies grant permissions for using Generative AI Service
-compartment_id = "<compartment_ocid>"
-CONFIG_PROFILE = "DEFAULT"
+with open('config.yaml', 'r') as file:
+    config_data = yaml.safe_load(file)
+
+compartment_id = config_data['compartment_id']
+CONFIG_PROFILE = config_data['config_profile']
 config = oci.config.from_file('~/.oci/config', CONFIG_PROFILE)
 
 # Service endpoint
@@ -32,7 +34,7 @@ generate_text_detail.prompts = prompts
 generate_text_detail.serving_mode = oci.generative_ai.models.OnDemandServingMode(model_id="cohere.command")
 # generate_text_detail.serving_mode = oci.generative_ai.models.DedicatedServingMode(endpoint_id="custom-model-endpoint") # for custom model from Dedicated AI Cluster
 generate_text_detail.compartment_id = compartment_id
-generate_text_detail.max_tokens = 20
+generate_text_detail.max_tokens = 300
 generate_text_detail.temperature = 0.75
 generate_text_detail.frequency_penalty = 1.0
 generate_text_detail.top_p = 0.7
@@ -46,3 +48,11 @@ generate_text_response = generative_ai_client.generate_text(generate_text_detail
 # Print result
 print("**************************Generate Texts Result**************************")
 print(generate_text_response.data)
+print(type(generate_text_response.data))
+
+generate_text_response
+json_object = json.loads(str(generate_text_response.data))
+
+print('Text response: {}'.format(json_object['generated_texts'][0][0]['text']))
+print('Model: {}'.format(json_object['model_id']))
+
