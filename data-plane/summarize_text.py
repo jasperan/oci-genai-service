@@ -24,15 +24,14 @@ CONFIG_PROFILE = config_data['config_profile']
 config = oci.config.from_file('~/.oci/config', CONFIG_PROFILE)
 
 # Service endpoint
-endpoint = "https://generativeai.aiservice.us-chicago-1.oci.oraclecloud.com"
+endpoint = "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
 
-generative_ai_client = oci.generative_ai.GenerativeAiClient(config=config, service_endpoint=endpoint, retry_strategy=oci.retry.NoneRetryStrategy(), timeout=(10,240))
-
+generative_ai_inference_client = oci.generative_ai_inference.GenerativeAiInferenceClient(config=config, service_endpoint=endpoint, retry_strategy=oci.retry.NoneRetryStrategy(), timeout=(10,240))
 with open('files/summarize_data.txt', 'r') as file:
     text_to_summarize = file.read()
 
-summarize_text_detail = oci.generative_ai.models.SummarizeTextDetails()
-summarize_text_detail.serving_mode = oci.generative_ai.models.OnDemandServingMode(model_id="cohere.command")
+summarize_text_detail = oci.generative_ai_inference.models.SummarizeTextDetails()
+summarize_text_detail.serving_mode = oci.generative_ai_inference.models.OnDemandServingMode(model_id="cohere.command")
 summarize_text_detail.compartment_id = compartment_id
 summarize_text_detail.input = text_to_summarize
 summarize_text_detail.additional_command = "Generate a teaser post for this article. Share an interesting insight to captivate attention."
@@ -45,7 +44,7 @@ if "<compartment_ocid>" in compartment_id:
     print("ERROR:Please update your compartment id in target python file")
     quit()
 
-summarize_text_response = generative_ai_client.summarize_text(summarize_text_detail)
+summarize_text_response = generative_ai_inference_client.summarize_text(summarize_text_detail)
 
 # Print result
 print("**************************Summarize Texts Result**************************")
