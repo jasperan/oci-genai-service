@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from oci_genai_service.vectordb.tables import validate_identifier
+
 
 def hybrid_search(
     table_name: str,
@@ -16,6 +18,10 @@ def hybrid_search(
 
     Returns the SQL string (caller provides bind variables for query_vector and query_text).
     """
+    validate_identifier(table_name)
+    validate_identifier(text_column)
+    validate_identifier(vector_column)
+    validate_identifier(metadata_column)
     return f"""
     SELECT {text_column}, {metadata_column},
         ({vector_weight} * (1 - VECTOR_DISTANCE({vector_column}, :query_vector, COSINE))

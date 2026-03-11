@@ -9,7 +9,7 @@ from typing import Callable, Optional
 
 import oracledb
 
-from oci_genai_service.vectordb.tables import VectorTableConfig, create_vector_table
+from oci_genai_service.vectordb.tables import VectorTableConfig, create_vector_table, validate_identifier
 
 
 @dataclass
@@ -35,6 +35,7 @@ class OracleVectorStore:
         embed_fn: Optional[Callable] = None,
         auto_create_table: bool = True,
     ):
+        validate_identifier(table_name)
         self.conn = oracledb.connect(user=user, password=password, dsn=dsn)
         self.table_config = VectorTableConfig(
             table_name=table_name,
@@ -120,6 +121,12 @@ class OracleVectorStore:
         with self.conn.cursor() as cur:
             cur.execute(f"SELECT COUNT(*) FROM {self.table_config.table_name}")
             return cur.fetchone()[0]
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
 
     def close(self):
         """Close the database connection."""

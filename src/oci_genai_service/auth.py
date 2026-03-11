@@ -6,7 +6,7 @@ Supports: User Principal, Instance Principal, Resource Principal, Session Token,
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Literal, Optional
 
 from oci_openai import OciUserPrincipalAuth

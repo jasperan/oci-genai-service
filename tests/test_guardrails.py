@@ -7,7 +7,7 @@ from oci_genai_service.guardrails.moderation import Guardrail, GuardrailResult
 class TestGuardrail:
     def test_default_config(self):
         guard = Guardrail()
-        assert guard.content_moderation is True
+        assert guard.content_moderation is False  # Not yet implemented — reserved for OCI AI Guardrails API
         assert guard.pii_detection is False
         assert guard.prompt_injection is False
 

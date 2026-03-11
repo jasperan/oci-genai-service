@@ -26,12 +26,6 @@ Production-ready Python toolkit for Oracle Cloud Infrastructure Generative AI Se
 pip install oci-genai-service
 ```
 
-For Oracle Vector Search support (requires Oracle Database 23ai):
-
-```bash
-pip install oci-genai-service[oracle]
-```
-
 ## Quick Start
 
 ### Chat Completion
@@ -209,13 +203,13 @@ oci-genai rag query "What are the main findings?" --dsn localhost:1521/FREEPDB1
 
 ## Oracle Vector Search Setup
 
-Start Oracle Database 23ai Free with Docker Compose:
+Start Oracle Database 26ai Free with Docker Compose:
 
 ```yaml
 # docker-compose.yml
 services:
   oracle-db:
-    image: gvenzl/oracle-free:23-slim-faststart
+    image: gvenzl/oracle-free:26-slim
     ports:
       - "1521:1521"
     environment:

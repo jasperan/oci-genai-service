@@ -28,7 +28,7 @@ class Guardrail:
 
     def __init__(
         self,
-        content_moderation: bool = True,
+        content_moderation: bool = False,  # Not yet implemented — reserved for OCI AI Guardrails API
         pii_detection: bool = False,
         prompt_injection: bool = False,
         config_file: str = "~/.oci/config",

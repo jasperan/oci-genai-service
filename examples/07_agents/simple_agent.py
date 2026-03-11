@@ -8,14 +8,16 @@ Requirements:
     pip install oci-genai-service
 """
 
+import ast
+
 from oci_genai_service import GenAIClient
 from oci_genai_service.agents import Agent, tool
 
 
 @tool
 def calculate(expression: str) -> str:
-    """Evaluate a math expression."""
-    return str(eval(expression))  # noqa: S307
+    """Evaluate a math expression (supports literals and basic arithmetic)."""
+    return str(ast.literal_eval(expression))
 
 
 @tool
