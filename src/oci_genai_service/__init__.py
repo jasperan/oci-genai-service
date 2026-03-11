@@ -1,6 +1,6 @@
 """OCI GenAI Service — Production-ready Python toolkit for Oracle Cloud Generative AI."""
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 
 from oci_genai_service.client import GenAIClient
 from oci_genai_service.auth import AuthConfig
