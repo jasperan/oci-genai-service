@@ -91,3 +91,19 @@ class GenAIClient:
             tools=tools,
             **kwargs,
         )
+
+    def embed(
+        self,
+        texts: list[str],
+        model: str = "cohere.embed-english-v3.0",
+        input_type: str = "SEARCH_DOCUMENT",
+    ) -> "EmbeddingResponse":
+        """Generate text embeddings via native OCI SDK."""
+        from oci_genai_service.inference.embeddings import embed_texts, EmbeddingResponse
+        return embed_texts(
+            config=self.config,
+            compartment_id=self.config.compartment_id,
+            texts=texts,
+            model=model,
+            input_type=input_type,
+        )
