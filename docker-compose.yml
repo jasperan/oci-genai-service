@@ -1,0 +1,20 @@
+services:
+  oracle-db:
+    image: gvenzl/oracle-free:26-slim
+    ports:
+      - "1521:1521"
+    environment:
+      ORACLE_PASSWORD: genai
+      APP_USER: genai
+      APP_USER_PASSWORD: genai
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+      - ./scripts/init_vectordb.sql:/container-entrypoint-initdb.d/01_init.sql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  oracle-data:

@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "oci-genai-service"
+version = "2.0.1"
+description = "Production-ready Python toolkit for Oracle Cloud Infrastructure Generative AI Service"
+readme = "README.md"
+license = "UPL-1.0"
+requires-python = ">=3.10"
+authors = [
+    { name = "jasperan" },
+]
+keywords = ["oci", "oracle", "genai", "llm", "openai", "vector-search", "rag"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "oci-openai>=0.2.0",
+    "oci>=2.130.0",
+    "openai>=1.0.0",
+    "oracledb>=2.0.0",
+    "docling>=2.0.0",
+    "pypdf>=4.0.0",
+    "click>=8.0.0",
+    "pydantic>=2.0.0",
+    "httpx>=0.25.0",
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+oci-genai = "oci_genai_service.cli.main:cli"
+
+[project.urls]
+Homepage = "https://github.com/jasperan/oci-genai-service"
+Documentation = "https://github.com/jasperan/oci-genai-service#readme"
+Repository = "https://github.com/jasperan/oci-genai-service"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/oci_genai_service"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
