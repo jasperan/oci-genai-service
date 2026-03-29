@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>oci-genai-service | Production-Ready Python Toolkit for OCI Generative AI</title>
+
+    <!-- Fonts: Manrope from Google Fonts (Electric Studio preset) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ===========================================
+           CSS CUSTOM PROPERTIES (Electric Studio Theme)
+           =========================================== */
+        :root {
+            /* Colors */
+            --bg-dark: #0a0a0a;
+            --bg-white: #ffffff;
+            --accent-blue: #4361ee;
+            --accent-blue-glow: rgba(67, 97, 238, 0.3);
+            --accent-blue-subtle: rgba(67, 97, 238, 0.08);
+            --text-dark: #0a0a0a;
+            --text-light: #ffffff;
+            --text-muted: #6b7280;
+            --text-muted-light: rgba(255, 255, 255, 0.5);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --card-dark: #111111;
+            --card-dark-hover: #1a1a1a;
+
+            /* Typography — Manrope */
+            --font-display: 'Manrope', sans-serif;
+            --font-body: 'Manrope', sans-serif;
+
+            /* Animation */
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --duration-normal: 0.6s;
+        }
+
+        /* ===========================================
+           BASE RESET
+           =========================================== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-dark);
+            color: var(--text-light);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===========================================
+           VIEWPORT FITTING: MANDATORY BASE STYLES
+           Include this ENTIRE file in every presentation.
+           These styles ensure slides fit exactly in the viewport.
+           =========================================== */
+
+        /* 1. Lock html/body to viewport */
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        html {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        /* 2. Each slide = exact viewport height */
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* 3. Content container with flex for centering */
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-height: 100%;
+            overflow: hidden;
+            padding: var(--slide-padding);
+        }
+
+        /* 4. ALL typography uses clamp() for responsive scaling */
+        :root {
+            --title-size: clamp(1.5rem, 5vw, 4rem);
+            --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+            --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+            --body-size: clamp(0.75rem, 1.5vw, 1.125rem);
+            --small-size: clamp(0.65rem, 1vw, 0.875rem);
+            --slide-padding: clamp(1rem, 4vw, 4rem);
+            --content-gap: clamp(0.5rem, 2vw, 2rem);
+            --element-gap: clamp(0.25rem, 1vw, 1rem);
+        }
+
+        /* 5. Cards/containers use viewport-relative max sizes */
+        .card, .container, .content-box {
+            max-width: min(90vw, 1000px);
+            max-height: min(80vh, 700px);
+        }
+
+        /* 6. Lists auto-scale with viewport */
+        .feature-list, .bullet-list {
+            gap: clamp(0.4rem, 1vh, 1rem);
+        }
+
+        .feature-list li, .bullet-list li {
+            font-size: var(--body-size);
+            line-height: 1.4;
+        }
+
+        /* 7. Grids adapt to available space */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+            gap: clamp(0.5rem, 1.5vw, 1rem);
+        }
+
+        /* 8. Images constrained to viewport */
+        img, .image-container {
+            max-width: 100%;
+            max-height: min(50vh, 400px);
+            object-fit: contain;
+        }
+
+        /* Short viewports (< 700px height) */
+        @media (max-height: 700px) {
+            :root {
+                --slide-padding: clamp(0.75rem, 3vw, 2rem);
+                --content-gap: clamp(0.4rem, 1.5vw, 1rem);
+                --title-size: clamp(1.25rem, 4.5vw, 2.5rem);
+                --h2-size: clamp(1rem, 3vw, 1.75rem);
+            }
+        }
+
+        /* Very short viewports (< 600px height) */
+        @media (max-height: 600px) {
+            :root {
+                --slide-padding: clamp(0.5rem, 2.5vw, 1.5rem);
+                --content-gap: clamp(0.3rem, 1vw, 0.75rem);
+                --title-size: clamp(1.1rem, 4vw, 2rem);
+                --body-size: clamp(0.7rem, 1.2vw, 0.95rem);
+            }
+            .nav-dots, .keyboard-hint, .decorative {
+                display: none;
+            }
+        }
+
+        /* Extremely short (landscape phones, < 500px height) */
+        @media (max-height: 500px) {
+            :root {
+                --slide-padding: clamp(0.4rem, 2vw, 1rem);
+                --title-size: clamp(1rem, 3.5vw, 1.5rem);
+                --h2-size: clamp(0.9rem, 2.5vw, 1.25rem);
+                --body-size: clamp(0.65rem, 1vw, 0.85rem);
+            }
+        }
+
+        /* Narrow viewports (< 600px width) */
+        @media (max-width: 600px) {
+            :root {
+                --title-size: clamp(1.25rem, 7vw, 2.5rem);
+            }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .split-panel {
+                flex-direction: column !important;
+            }
+            .split-panel .panel {
+                width: 100% !important;
+                height: 50% !important;
+            }
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.2s !important;
+            }
+            html {
+                scroll-behavior: auto;
+            }
+        }
+
+        /* ===========================================
+           ANIMATIONS
+           =========================================== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity var(--duration-normal) var(--ease-out-expo),
+                        transform var(--duration-normal) var(--ease-out-expo);
+        }
+
+        .reveal-left {
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: opacity var(--duration-normal) var(--ease-out-expo),
+                        transform var(--duration-normal) var(--ease-out-expo);
+        }
+
+        .reveal-scale {
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity var(--duration-normal) var(--ease-out-expo),
+                        transform var(--duration-normal) var(--ease-out-expo);
+        }
+
+        .slide.visible .reveal,
+        .slide.visible .reveal-left,
+        .slide.visible .reveal-scale {
+            opacity: 1;
+            transform: translateY(0) translateX(0) scale(1);
+        }
+
+        /* Stagger children */
+        .reveal:nth-child(1), .reveal-left:nth-child(1) { transition-delay: 0.1s; }
+        .reveal:nth-child(2), .reveal-left:nth-child(2) { transition-delay: 0.2s; }
+        .reveal:nth-child(3), .reveal-left:nth-child(3) { transition-delay: 0.3s; }
+        .reveal:nth-child(4), .reveal-left:nth-child(4) { transition-delay: 0.4s; }
+        .reveal:nth-child(5), .reveal-left:nth-child(5) { transition-delay: 0.5s; }
+        .reveal:nth-child(6), .reveal-left:nth-child(6) { transition-delay: 0.6s; }
+
+        /* ===========================================
+           PROGRESS BAR
+           =========================================== */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: var(--accent-blue);
+            z-index: 9999;
+            transition: width 0.3s var(--ease-out-expo);
+            box-shadow: 0 0 10px var(--accent-blue-glow);
+        }
+
+        /* ===========================================
+           NAV DOTS
+           =========================================== */
+        .nav-dots {
+            position: fixed;
+            right: clamp(12px, 2vw, 24px);
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: clamp(6px, 0.8vh, 10px);
+            z-index: 9998;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s var(--ease-out-expo);
+            padding: 0;
+        }
+
+        .nav-dot.active {
+            background: var(--accent-blue);
+            box-shadow: 0 0 8px var(--accent-blue-glow);
+            transform: scale(1.3);
+        }
+
+        .nav-dot:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* ===========================================
+           SLIDE COUNTER
+           =========================================== */
+        .slide-counter {
+            position: fixed;
+            top: clamp(12px, 2vw, 24px);
+            right: clamp(12px, 2vw, 24px);
+            font-size: var(--small-size);
+            color: var(--text-muted-light);
+            font-weight: 500;
+            z-index: 9998;
+            font-family: var(--font-body);
+        }
+
+        /* ===========================================
+           ELECTRIC STUDIO: SPLIT PANEL LAYOUT
+           =========================================== */
+        .split-panel {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: var(--slide-padding);
+        }
+
+        .panel-dark {
+            background: var(--bg-dark);
+            color: var(--text-light);
+            width: 55%;
+        }
+
+        .panel-white {
+            background: var(--bg-white);
+            color: var(--text-dark);
+            width: 45%;
+            position: relative;
+        }
+
+        .panel-blue {
+            background: var(--accent-blue);
+            color: var(--text-light);
+            width: 45%;
+            position: relative;
+        }
+
+        /* Accent bar on panel edge */
+        .panel-white::before,
+        .panel-blue::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 10%;
+            height: 80%;
+            width: 4px;
+            background: var(--accent-blue);
+        }
+
+        .panel-blue::before {
+            background: var(--text-light);
+            opacity: 0.3;
+        }
+
+        /* ===========================================
+           TYPOGRAPHY
+           =========================================== */
+        h1 {
+            font-family: var(--font-display);
+            font-size: var(--title-size);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            font-family: var(--font-display);
+            font-size: var(--h2-size);
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.01em;
+        }
+
+        h3 {
+            font-family: var(--font-display);
+            font-size: var(--h3-size);
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        p, li {
+            font-family: var(--font-body);
+            font-size: var(--body-size);
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        .subtitle {
+            font-size: clamp(0.85rem, 1.8vw, 1.2rem);
+            font-weight: 500;
+            color: var(--text-muted-light);
+        }
+
+        .label {
+            font-size: var(--small-size);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent-blue);
+        }
+
+        .label-light {
+            color: var(--text-muted-light);
+        }
+
+        /* ===========================================
+           FEATURE CARDS
+           =========================================== */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+            gap: clamp(0.5rem, 1.5vw, 1rem);
+        }
+
+        .feature-card {
+            background: var(--card-dark);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: clamp(0.75rem, 2vw, 1.5rem);
+            transition: border-color 0.3s ease, transform 0.3s var(--ease-out-expo);
+        }
+
+        .feature-card:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-2px);
+        }
+
+        .feature-card .icon {
+            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+            margin-bottom: clamp(0.3rem, 0.8vw, 0.6rem);
+        }
+
+        .feature-card h3 {
+            font-size: clamp(0.8rem, 1.5vw, 1.1rem);
+            margin-bottom: clamp(0.2rem, 0.5vw, 0.4rem);
+        }
+
+        .feature-card p {
+            font-size: var(--small-size);
+            color: var(--text-muted-light);
+            line-height: 1.4;
+        }
+
+        /* Light variant for white panels */
+        .feature-card-light {
+            background: #f5f5f5;
+            border-color: #e5e7eb;
+            color: var(--text-dark);
+        }
+
+        .feature-card-light p {
+            color: var(--text-muted);
+        }
+
+        /* ===========================================
+           CODE BLOCKS
+           =========================================== */
+        .code-block {
+            background: #111111;
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: clamp(0.6rem, 1.5vw, 1.2rem);
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: clamp(0.6rem, 1.1vw, 0.85rem);
+            line-height: 1.5;
+            overflow: hidden;
+            white-space: pre;
+            color: #e5e7eb;
+        }
+
+        .code-block .keyword { color: #c792ea; }
+        .code-block .string { color: #c3e88d; }
+        .code-block .comment { color: #546e7a; }
+        .code-block .function { color: #82aaff; }
+        .code-block .decorator { color: #ffcb6b; }
+        .code-block .param { color: #f78c6c; }
+
+        /* Light code block for white panels */
+        .code-block-light {
+            background: #f8f8f8;
+            border-color: #e5e7eb;
+            color: #1a1a1a;
+        }
+
+        /* ===========================================
+           TABLE STYLES
+           =========================================== */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: var(--small-size);
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: clamp(0.3rem, 0.8vw, 0.6rem) clamp(0.4rem, 1vw, 0.8rem);
+            border-bottom: 2px solid var(--accent-blue);
+            font-weight: 700;
+            color: var(--accent-blue);
+            font-size: var(--small-size);
+        }
+
+        .data-table td {
+            padding: clamp(0.25rem, 0.6vw, 0.5rem) clamp(0.4rem, 1vw, 0.8rem);
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: var(--small-size);
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* ===========================================
+           BADGES / PILLS
+           =========================================== */
+        .badge {
+            display: inline-block;
+            padding: clamp(0.15rem, 0.4vw, 0.3rem) clamp(0.4rem, 1vw, 0.8rem);
+            border-radius: 20px;
+            font-size: var(--small-size);
+            font-weight: 600;
+            background: var(--accent-blue-subtle);
+            color: var(--accent-blue);
+            border: 1px solid rgba(67, 97, 238, 0.2);
+        }
+
+        .badge-light {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--accent-blue);
+        }
+
+        .badge-white {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--text-light);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* ===========================================
+           FLOW / DIAGRAM
+           =========================================== */
+        .flow-horizontal {
+            display: flex;
+            align-items: center;
+            gap: clamp(0.3rem, 1vw, 1rem);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .flow-step {
+            background: var(--card-dark);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: clamp(0.5rem, 1.2vw, 1rem) clamp(0.6rem, 1.5vw, 1.2rem);
+            text-align: center;
+            min-width: clamp(80px, 12vw, 140px);
+        }
+
+        .flow-step .step-icon {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            margin-bottom: 0.3rem;
+        }
+
+        .flow-step .step-label {
+            font-size: var(--small-size);
+            font-weight: 600;
+        }
+
+        .flow-arrow {
+            font-size: clamp(0.8rem, 1.5vw, 1.2rem);
+            color: var(--accent-blue);
+        }
+
+        /* ===========================================
+           UTILITY
+           =========================================== */
+        .gap-sm { gap: var(--element-gap); }
+        .gap-md { gap: var(--content-gap); }
+        .mt-sm { margin-top: var(--element-gap); }
+        .mt-md { margin-top: var(--content-gap); }
+        .mb-sm { margin-bottom: var(--element-gap); }
+        .text-center { text-align: center; }
+        .text-accent { color: var(--accent-blue); }
+        .flex-col { display: flex; flex-direction: column; }
+        .flex-1 { flex: 1; }
+        .items-center { align-items: center; }
+
+        /* ===========================================
+           BACKGROUND PATTERNS
+           =========================================== */
+        .grid-bg {
+            background-image:
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        .gradient-glow::after {
+            content: '';
+            position: absolute;
+            width: clamp(200px, 40vw, 500px);
+            height: clamp(200px, 40vw, 500px);
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--accent-blue-glow) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .gradient-glow > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===========================================
+           SLIDE-SPECIFIC LAYOUTS
+           =========================================== */
+
+        /* Title slide */
+        .title-slide {
+            background: var(--bg-dark);
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .title-slide .slide-content {
+            align-items: center;
+            max-width: min(90vw, 800px);
+        }
+
+        /* Full dark slide */
+        .dark-slide {
+            background: var(--bg-dark);
+        }
+
+        .dark-slide .slide-content {
+            max-width: min(90vw, 1100px);
+            margin: 0 auto;
+        }
+
+        /* Closing slide */
+        .closing-slide {
+            background: var(--accent-blue);
+            color: var(--text-light);
+            text-align: center;
+        }
+
+        .closing-slide .slide-content {
+            align-items: center;
+        }
+
+        .closing-slide a {
+            color: var(--text-light);
+            text-decoration: none;
+            border-bottom: 2px solid rgba(255,255,255,0.4);
+            transition: border-color 0.3s ease;
+        }
+
+        .closing-slide a:hover {
+            border-color: var(--text-light);
+        }
+
+        /* Number label */
+        .slide-number {
+            position: absolute;
+            top: var(--slide-padding);
+            left: var(--slide-padding);
+            font-size: var(--small-size);
+            font-weight: 700;
+            color: var(--text-muted-light);
+            letter-spacing: 0.05em;
+        }
+
+        .panel-white .slide-number,
+        .panel-blue .slide-number {
+            color: inherit;
+            opacity: 0.4;
+        }
+
+        /* List styles */
+        .clean-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(0.3rem, 0.8vh, 0.7rem);
+        }
+
+        .clean-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: clamp(0.4rem, 0.8vw, 0.6rem);
+            font-size: var(--body-size);
+        }
+
+        .clean-list li::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            min-width: 6px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            margin-top: 0.5em;
+        }
+
+        .icon-list li::before {
+            display: none;
+        }
+
+        /* Separator */
+        .accent-line {
+            width: 40px;
+            height: 3px;
+            background: var(--accent-blue);
+            border-radius: 2px;
+        }
+
+        /* Auth method row */
+        .auth-row {
+            display: flex;
+            align-items: center;
+            gap: clamp(0.5rem, 1vw, 1rem);
+            padding: clamp(0.3rem, 0.6vw, 0.5rem) 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .auth-row:last-child {
+            border-bottom: none;
+        }
+
+        .auth-row .auth-name {
+            font-weight: 700;
+            min-width: clamp(100px, 15vw, 180px);
+            font-size: var(--body-size);
+        }
+
+        .auth-row .auth-desc {
+            font-size: var(--small-size);
+            color: var(--text-muted-light);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Progress bar -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Navigation dots -->
+    <nav class="nav-dots" id="navDots" aria-label="Slide navigation"></nav>
+
+    <!-- Slide counter -->
+    <div class="slide-counter" id="slideCounter">1 / 22</div>
+
+    <!-- ===================================================
+         SLIDE 1: TITLE
+         =================================================== -->
+    <section class="slide title-slide grid-bg gradient-glow" aria-label="Title">
+        <div class="slide-content">
+            <div class="label reveal" style="margin-bottom: var(--element-gap);">Open Source &middot; PyPI &middot; UPL-1.0</div>
+            <h1 class="reveal">oci-genai-service</h1>
+            <div class="accent-line reveal mt-sm"></div>
+            <p class="subtitle reveal mt-sm">Production-ready Python toolkit for Oracle Cloud Infrastructure Generative AI Service</p>
+            <div class="reveal mt-md" style="display: flex; gap: clamp(0.4rem, 1vw, 0.8rem); flex-wrap: wrap; justify-content: center;">
+                <span class="badge">pip install oci-genai-service</span>
+                <span class="badge-white badge">Python 3.9+</span>
+            </div>
+        </div>
+        <div class="gradient-glow" style="position:absolute; bottom: -30%; right: -10%; opacity: 0.4;"></div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 2: THE PROBLEM
+         =================================================== -->
+    <section class="slide dark-slide grid-bg" aria-label="The Problem">
+        <span class="slide-number">01</span>
+        <div class="slide-content">
+            <div class="label reveal">The Problem</div>
+            <h2 class="reveal mt-sm">OCI GenAI has two separate APIs.</h2>
+            <p class="subtitle reveal mt-sm" style="max-width: min(85vw, 700px);">OpenAI-compatible for Llama, Grok, and GPT-OSS. Native OCI SDK for Cohere. Switching between them means rewriting your client code every time you change models.</p>
+            <div class="reveal mt-md" style="display: flex; gap: var(--content-gap); flex-wrap: wrap;">
+                <div class="feature-card" style="flex: 1; min-width: min(100%, 200px);">
+                    <div class="icon">&#x26A0;</div>
+                    <h3>Two API surfaces</h3>
+                    <p>Different SDKs, different auth, different response formats for the same service</p>
+                </div>
+                <div class="feature-card" style="flex: 1; min-width: min(100%, 200px);">
+                    <div class="icon">&#x1F504;</div>
+                    <h3>Model lock-in</h3>
+                    <p>Switching vendors means rewriting integration code, not just changing a model ID</p>
+                </div>
+                <div class="feature-card" style="flex: 1; min-width: min(100%, 200px);">
+                    <div class="icon">&#x1F527;</div>
+                    <h3>Missing pieces</h3>
+                    <p>RAG, agents, guardrails, and vector search all require separate boilerplate</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 3: THE SOLUTION
+         =================================================== -->
+    <section class="slide" aria-label="The Solution">
+        <div class="split-panel">
+            <div class="panel panel-dark">
+                <div class="label reveal">The Solution</div>
+                <h2 class="reveal mt-sm">One client.<br>Every model.</h2>
+                <p class="reveal mt-sm" style="max-width: min(85%, 500px); color: var(--text-muted-light);">GenAIClient auto-routes between OpenAI-compatible and native OCI APIs. Change a model ID; the client handles the rest.</p>
+                <div class="accent-line reveal mt-sm"></div>
+            </div>
+            <div class="panel panel-blue" style="justify-content: center; align-items: center;">
+                <div class="reveal-scale" style="text-align: center;">
+                    <div style="font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 800; line-height: 1;">13+</div>
+                    <div style="font-size: var(--body-size); margin-top: 0.5rem; opacity: 0.8;">chat models supported</div>
+                    <div style="margin-top: var(--content-gap); font-size: clamp(1.5rem, 4vw, 3rem); font-weight: 800;">4</div>
+                    <div style="font-size: var(--body-size); opacity: 0.8;">embedding models</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 4: KEY FEATURES (1 of 2)
+         =================================================== -->
+    <section class="slide dark-slide" aria-label="Key Features 1">
+        <span class="slide-number">02</span>
+        <div class="slide-content">
+            <div class="label reveal">Core Features</div>
+            <h2 class="reveal mt-sm">What's in the box</h2>
+            <div class="feature-grid reveal mt-md">
+                <div class="feature-card">
+                    <div class="icon">&#x1F4AC;</div>
+                    <h3>Chat & Streaming</h3>
+                    <p>Sync and streaming completions. Vision support for image+text prompts.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">&#x1F9E0;</div>
+                    <h3>Function Calling</h3>
+                    <p>@tool decorator auto-generates OpenAI-format schemas from type hints.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">&#x1F50D;</div>
+                    <h3>RAG Pipeline</h3>
+                    <p>Docling doc loading, recursive chunking, retrieval-augmented generation.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">&#x1F916;</div>
+                    <h3>Tool-Calling Agent</h3>
+                    <p>Multi-turn sessions, memory, configurable reasoning loops.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">&#x1F6E1;</div>
+                    <h3>Guardrails</h3>
+                    <p>Content moderation, PII detection, prompt injection defense.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">&#x1F4CA;</div>
+                    <h3>Embeddings</h3>
+                    <p>Cohere Embed v3 models via native OCI SDK. 384 or 1024 dims.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 5: KEY FEATURES (2 of 2)
+         =================================================== -->
+    <section class="slide dark-slide grid-bg" aria-label="Key Features 2">
+        <span class="slide-number">03</span>
+        <div class="slide-content">
+            <div class="label reveal">More Features</div>
+            <h2 class="reveal mt-sm">And then some</h2>
+            <div class="feature-grid reveal mt-md">
+                <div class="feature-card">
+                    <div class="icon">&#x1F4BE;</div>
+                    <h3>Oracle Vector Search</h3>
+                    <p>Production-grade vector storage with Oracle AI Vector Search integration.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">&#x1F4AD;</div>
+                    <h3>Thinking Traces</h3>
+                    <p>Extract reasoning chains from Grok Code and GPT-OSS models.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">&#x1F4BB;</div>
+                    <h3>Full CLI</h3>
+                    <p>Interactive chat, model browsing, embeddings, and RAG from the terminal.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">&#x1F512;</div>
+                    <h3>5 Auth Methods</h3>
+                    <p>User Principal, API Key, Instance Principal, Resource Principal, Session Token.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 6: ARCHITECTURE OVERVIEW
+         =================================================== -->
+    <section class="slide dark-slide" aria-label="Architecture">
+        <span class="slide-number">04</span>
+        <div class="slide-content">
+            <div class="label reveal">Architecture</div>
+            <h2 class="reveal mt-sm">How it fits together</h2>
+            <div class="flow-horizontal reveal mt-md">
+                <div class="flow-step">
+                    <div class="step-icon">&#x1F468;&#x200D;&#x1F4BB;</div>
+                    <div class="step-label">Your Code</div>
+                </div>
+                <div class="flow-arrow">&#x2192;</div>
+                <div class="flow-step" style="border-color: var(--accent-blue);">
+                    <div class="step-icon">&#x2699;</div>
+                    <div class="step-label">GenAIClient</div>
+                </div>
+                <div class="flow-arrow">&#x2192;</div>
+                <div class="flow-step">
+                    <div class="step-icon">&#x1F500;</div>
+                    <div class="step-label">Auto-Router</div>
+                </div>
+                <div class="flow-arrow">&#x2192;</div>
+                <div class="flow-step">
+                    <div class="step-icon">&#x2601;</div>
+                    <div class="step-label">OCI GenAI</div>
+                </div>
+            </div>
+            <div style="display: flex; gap: var(--content-gap); margin-top: var(--content-gap); flex-wrap: wrap;" class="reveal">
+                <div style="flex: 1; min-width: min(100%, 180px);">
+                    <div style="font-size: var(--small-size); font-weight: 700; color: var(--accent-blue); margin-bottom: 0.3rem;">OpenAI-Compatible</div>
+                    <div style="font-size: var(--small-size); color: var(--text-muted-light);">Llama 4, Grok, GPT-OSS, xAI Vision</div>
+                </div>
+                <div style="flex: 1; min-width: min(100%, 180px);">
+                    <div style="font-size: var(--small-size); font-weight: 700; color: var(--accent-blue); margin-bottom: 0.3rem;">Native OCI SDK</div>
+                    <div style="font-size: var(--small-size); color: var(--text-muted-light);">Cohere Command, Cohere Embed</div>
+                </div>
+                <div style="flex: 1; min-width: min(100%, 180px);">
+                    <div style="font-size: var(--small-size); font-weight: 700; color: var(--accent-blue); margin-bottom: 0.3rem;">Vector DB</div>
+                    <div style="font-size: var(--small-size); color: var(--text-muted-light);">Oracle AI Vector Search (auto-create tables)</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 7: PROJECT STRUCTURE
+         =================================================== -->
+    <section class="slide" aria-label="Project Structure">
+        <div class="split-panel">
+            <div class="panel panel-dark">
+                <span class="slide-number">05</span>
+                <div class="label reveal">Source Layout</div>
+                <h2 class="reveal mt-sm">Clean modular structure</h2>
+                <p class="reveal mt-sm" style="color: var(--text-muted-light);">Every capability lives in its own subpackage. Swap or extend without touching the core client.</p>
+            </div>
+            <div class="panel panel-white" style="justify-content: center;">
+                <div class="code-block code-block-light reveal" style="color: var(--text-dark);">
+src/oci_genai_service/
+  client.py        <span class="comment"># GenAIClient + AuthConfig</span>
+  models.py        <span class="comment"># Pydantic response models</span>
+  auth.py          <span class="comment"># 5 auth methods</span>
+  inference/
+    chat.py        <span class="comment"># Chat completions</span>
+    vision.py      <span class="comment"># Image + text</span>
+    embeddings.py  <span class="comment"># Cohere Embed v3</span>
+    tools.py       <span class="comment"># @tool decorator</span>
+    thinking.py    <span class="comment"># Reasoning traces</span>
+  agents/
+    agent.py       <span class="comment"># Tool-calling Agent</span>
+    memory.py      <span class="comment"># Session memory</span>
+  rag/             <span class="comment"># Pipeline + loaders</span>
+  vectordb/        <span class="comment"># Oracle Vector Search</span>
+  guardrails/      <span class="comment"># Moderation, PII</span>
+  cli/main.py      <span class="comment"># Click CLI</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 8: QUICK START
+         =================================================== -->
+    <section class="slide dark-slide" aria-label="Quick Start">
+        <span class="slide-number">06</span>
+        <div class="slide-content">
+            <div class="label reveal">Quick Start</div>
+            <h2 class="reveal mt-sm">Three lines to your first completion</h2>
+            <div class="code-block reveal mt-md"><span class="keyword">from</span> oci_genai_service <span class="keyword">import</span> GenAIClient
+
+client = GenAIClient(compartment_id=<span class="string">"ocid1.compartment.oc1..xxx"</span>)
+response = client.chat(<span class="string">"Explain Oracle AI Vector Search in 3 sentences."</span>)
+<span class="function">print</span>(response.text)</div>
+            <p class="reveal mt-sm" style="color: var(--text-muted-light);">Defaults to Llama 4 Maverick. Uses ~/.oci/config for auth. Set OCI_COMPARTMENT_ID to skip the argument.</p>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 9: STREAMING
+         =================================================== -->
+    <section class="slide" aria-label="Streaming">
+        <div class="split-panel">
+            <div class="panel panel-dark">
+                <span class="slide-number">07</span>
+                <div class="label reveal">Streaming</div>
+                <h2 class="reveal mt-sm">Real-time token output</h2>
+                <p class="reveal mt-sm" style="color: var(--text-muted-light);">Pass stream=True and iterate. Each chunk arrives as soon as the model produces it.</p>
+            </div>
+            <div class="panel panel-white" style="justify-content: center;">
+                <div class="code-block code-block-light reveal" style="color: var(--text-dark);">
+<span class="keyword">from</span> oci_genai_service <span class="keyword">import</span> GenAIClient
+
+client = GenAIClient(
+    compartment_id=<span class="string">"ocid1..."</span>
+)
+
+<span class="keyword">for</span> chunk <span class="keyword">in</span> client.chat(
+    <span class="string">"Write a haiku about databases."</span>,
+    stream=<span class="keyword">True</span>
+):
+    <span class="function">print</span>(chunk, end=<span class="string">""</span>, flush=<span class="keyword">True</span>)</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 10: VISION
+         =================================================== -->
+    <section class="slide dark-slide grid-bg" aria-label="Vision">
+        <span class="slide-number">08</span>
+        <div class="slide-content">
+            <div class="label reveal">Vision</div>
+            <h2 class="reveal mt-sm">Image + text in one call</h2>
+            <div class="code-block reveal mt-md"><span class="keyword">from</span> oci_genai_service <span class="keyword">import</span> GenAIClient
+
+client = GenAIClient(compartment_id=<span class="string">"ocid1..."</span>)
+
+response = client.chat(
+    <span class="string">"Describe this architecture diagram."</span>,
+    model=<span class="string">"meta.llama-3.2-90b-vision-instruct"</span>,
+    images=[<span class="string">"diagram.png"</span>],
+)
+<span class="function">print</span>(response.text)</div>
+            <div class="reveal mt-sm" style="display: flex; gap: var(--element-gap); flex-wrap: wrap;">
+                <span class="badge">Llama 3.2 90B Vision</span>
+                <span class="badge">Llama 3.2 11B Vision</span>
+                <span class="badge-white badge">131K context</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 11: FUNCTION CALLING
+         =================================================== -->
+    <section class="slide" aria-label="Function Calling">
+        <div class="split-panel">
+            <div class="panel panel-dark">
+                <span class="slide-number">09</span>
+                <div class="label reveal">Function Calling</div>
+                <h2 class="reveal mt-sm">@tool makes it automatic</h2>
+                <p class="reveal mt-sm" style="color: var(--text-muted-light);">Decorate any function. Type hints and docstrings become OpenAI-format tool schemas. No manual JSON.</p>
+            </div>
+            <div class="panel panel-white" style="justify-content: center;">
+                <div class="code-block code-block-light reveal" style="color: var(--text-dark);">
+<span class="decorator">@tool</span>
+<span class="keyword">def</span> <span class="function">get_weather</span>(city: <span class="param">str</span>) -> <span class="param">str</span>:
+    <span class="string">"""Get current weather."""</span>
+    <span class="keyword">return</span> <span class="string">f"72F in {city}"</span>
+
+<span class="decorator">@tool</span>
+<span class="keyword">def</span> <span class="function">get_population</span>(city: <span class="param">str</span>) -> <span class="param">int</span>:
+    <span class="string">"""Get population of a city."""</span>
+    <span class="keyword">return</span> 1_000_000
+
+agent = Agent(
+    client=client,
+    tools=[get_weather, get_population]
+)
+result = agent.run(<span class="string">"Weather in Austin?"</span>)</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 12: RAG PIPELINE
+         =================================================== -->
+    <section class="slide dark-slide" aria-label="RAG Pipeline">
+        <span class="slide-number">10</span>
+        <div class="slide-content">
+            <div class="label reveal">RAG Pipeline</div>
+            <h2 class="reveal mt-sm">Document to answer in 4 lines</h2>
+            <div class="code-block reveal mt-md"><span class="keyword">from</span> oci_genai_service <span class="keyword">import</span> GenAIClient, RAGPipeline, OracleVectorStore
+
+client = GenAIClient(compartment_id=<span class="string">"ocid1..."</span>)
+store  = OracleVectorStore(dsn=<span class="string">"localhost:1521/FREEPDB1"</span>, user=<span class="string">"genai"</span>, password=<span class="string">"genai"</span>)
+
+pipeline = RAGPipeline(client=client, vector_store=store)
+pipeline.ingest(<span class="string">"quarterly-report.pdf"</span>)
+
+result = pipeline.query(<span class="string">"What was revenue in Q4?"</span>)
+<span class="function">print</span>(result.text)</div>
+            <div class="flow-horizontal reveal mt-sm">
+                <div class="flow-step"><div class="step-icon">&#x1F4C4;</div><div class="step-label">Docling Load</div></div>
+                <div class="flow-arrow">&#x2192;</div>
+                <div class="flow-step"><div class="step-icon">&#x2702;</div><div class="step-label">Chunk</div></div>
+                <div class="flow-arrow">&#x2192;</div>
+                <div class="flow-step"><div class="step-icon">&#x1F4CA;</div><div class="step-label">Embed</div></div>
+                <div class="flow-arrow">&#x2192;</div>
+                <div class="flow-step"><div class="step-icon">&#x1F50D;</div><div class="step-label">Retrieve</div></div>
+                <div class="flow-arrow">&#x2192;</div>
+                <div class="flow-step" style="border-color: var(--accent-blue);"><div class="step-icon">&#x1F4AC;</div><div class="step-label">Generate</div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 13: ORACLE VECTOR SEARCH
+         =================================================== -->
+    <section class="slide" aria-label="Oracle Vector Search">
+        <div class="split-panel">
+            <div class="panel panel-dark">
+                <span class="slide-number">11</span>
+                <div class="label reveal">Vector Storage</div>
+                <h2 class="reveal mt-sm">Oracle AI Vector Search</h2>
+                <ul class="clean-list reveal mt-sm">
+                    <li>Auto-creates vector tables on first use</li>
+                    <li>Production-grade storage (not an in-memory hack)</li>
+                    <li>Works with Oracle Database 26ai Free</li>
+                    <li>Docker Compose one-command setup</li>
+                </ul>
+            </div>
+            <div class="panel panel-white" style="justify-content: center;">
+                <div class="code-block code-block-light reveal" style="color: var(--text-dark);">
+<span class="comment"># docker-compose.yml</span>
+services:
+  oracle-db:
+    image: gvenzl/oracle-free:26-slim
+    ports:
+      - <span class="string">"1521:1521"</span>
+    environment:
+      ORACLE_PASSWORD: genai
+      APP_USER: genai
+      APP_USER_PASSWORD: genai
+
+<span class="comment"># Then:</span>
+docker compose up -d</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 14: AGENT SYSTEM
+         =================================================== -->
+    <section class="slide dark-slide" aria-label="Agent System">
+        <span class="slide-number">12</span>
+        <div class="slide-content">
+            <div class="label reveal">Agents</div>
+            <h2 class="reveal mt-sm">Tool-calling agent with memory</h2>
+            <div style="display: flex; gap: var(--content-gap); flex-wrap: wrap;" class="mt-md">
+                <div style="flex: 1; min-width: min(100%, 250px);">
+                    <div class="code-block reveal"><span class="keyword">from</span> oci_genai_service <span class="keyword">import</span> Agent
+
+agent = Agent(
+    client=client,
+    tools=[get_weather, get_population],
+    max_steps=<span class="param">5</span>
+)
+
+result = agent.run(
+    <span class="string">"Weather and pop in Austin?"</span>
+)
+<span class="function">print</span>(result.text)
+<span class="function">print</span>(<span class="string">f"Steps: {result.steps}"</span>)</div>
+                </div>
+                <div style="flex: 1; min-width: min(100%, 200px); display: flex; flex-direction: column; gap: var(--element-gap);">
+                    <div class="feature-card reveal">
+                        <h3>Multi-turn sessions</h3>
+                        <p>Agent remembers context across conversation turns.</p>
+                    </div>
+                    <div class="feature-card reveal">
+                        <h3>Configurable loops</h3>
+                        <p>Set max_steps to control how many tool calls the agent can make.</p>
+                    </div>
+                    <div class="feature-card reveal">
+                        <h3>Automatic schemas</h3>
+                        <p>@tool decorator converts Python functions to OpenAI tool format.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 15: GUARDRAILS
+         =================================================== -->
+    <section class="slide" aria-label="Guardrails">
+        <div class="split-panel">
+            <div class="panel panel-dark">
+                <span class="slide-number">13</span>
+                <div class="label reveal">Guardrails</div>
+                <h2 class="reveal mt-sm">Safety built in</h2>
+                <ul class="clean-list reveal mt-sm">
+                    <li>Content moderation with configurable thresholds</li>
+                    <li>PII detection (emails, phone numbers, SSNs)</li>
+                    <li>Prompt injection defense</li>
+                    <li>Works as middleware or standalone</li>
+                </ul>
+            </div>
+            <div class="panel panel-blue" style="justify-content: center; align-items: center;">
+                <div style="display: flex; flex-direction: column; gap: var(--content-gap); text-align: center;">
+                    <div class="reveal-scale">
+                        <div style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800;">3</div>
+                        <div style="font-size: var(--body-size); opacity: 0.8;">protection layers</div>
+                    </div>
+                    <div class="reveal" style="display: flex; gap: var(--element-gap); flex-wrap: wrap; justify-content: center;">
+                        <span class="badge-white badge">Moderation</span>
+                        <span class="badge-white badge">PII</span>
+                        <span class="badge-white badge">Injection</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 16: THINKING TRACES
+         =================================================== -->
+    <section class="slide dark-slide grid-bg" aria-label="Thinking Traces">
+        <span class="slide-number">14</span>
+        <div class="slide-content">
+            <div class="label reveal">Thinking Traces</div>
+            <h2 class="reveal mt-sm">See the model's reasoning</h2>
+            <p class="subtitle reveal mt-sm">Extract chain-of-thought from reasoning models like Grok Code Fast and GPT-OSS 120B.</p>
+            <div class="code-block reveal mt-md">response = client.chat(
+    <span class="string">"Is 97 prime? Show your reasoning."</span>,
+    model=<span class="string">"xai.grok-code-fast-1"</span>,
+    extract_thinking=<span class="keyword">True</span>
+)
+
+<span class="function">print</span>(<span class="string">"Thinking:"</span>, response.thinking)
+<span class="function">print</span>(<span class="string">"Answer:"</span>, response.text)</div>
+            <div class="reveal mt-sm" style="display: flex; gap: var(--element-gap); flex-wrap: wrap;">
+                <span class="badge">Grok Code Fast 1</span>
+                <span class="badge">GPT-OSS 120B</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 17: SUPPORTED MODELS (Chat)
+         =================================================== -->
+    <section class="slide dark-slide" aria-label="Chat Models">
+        <span class="slide-number">15</span>
+        <div class="slide-content">
+            <div class="label reveal">Supported Models</div>
+            <h2 class="reveal mt-sm">Chat models (OpenAI-compatible)</h2>
+            <div class="reveal mt-md" style="overflow: hidden;">
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Model</th><th>Vendor</th><th>Capabilities</th><th>Context</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Llama 4 Scout / Maverick</td><td>Meta</td><td>chat, function_calling, streaming</td><td>131K</td></tr>
+                        <tr><td>Llama 3.3 70B / 3.1 405B / 70B</td><td>Meta</td><td>chat, function_calling, streaming</td><td>131K</td></tr>
+                        <tr><td>Grok 4 / 4.1 Fast / 3 / 3 Mini</td><td>xAI</td><td>chat, streaming</td><td>131K</td></tr>
+                        <tr><td>Grok Code Fast 1</td><td>xAI</td><td>chat, streaming, thinking</td><td>131K</td></tr>
+                        <tr><td>GPT-OSS 120B / 20B</td><td>OpenAI</td><td>chat, streaming, thinking</td><td>131K</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 18: SUPPORTED MODELS (Native + Embedding)
+         =================================================== -->
+    <section class="slide" aria-label="Native and Embedding Models">
+        <div class="split-panel">
+            <div class="panel panel-dark">
+                <span class="slide-number">16</span>
+                <div class="label reveal">Native OCI Models</div>
+                <h2 class="reveal mt-sm">Cohere family</h2>
+                <div class="reveal mt-sm" style="overflow: hidden;">
+                    <table class="data-table">
+                        <thead><tr><th>Model</th><th>Context</th></tr></thead>
+                        <tbody>
+                            <tr><td>Command A</td><td>262K</td></tr>
+                            <tr><td>Command R+</td><td>131K</td></tr>
+                            <tr><td>Command R</td><td>131K</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="panel panel-white" style="color: var(--text-dark);">
+                <div class="label reveal" style="color: var(--accent-blue);">Embedding Models</div>
+                <h2 class="reveal mt-sm" style="color: var(--text-dark);">Cohere Embed v3</h2>
+                <div class="reveal mt-sm" style="overflow: hidden;">
+                    <table class="data-table" style="color: var(--text-dark);">
+                        <thead><tr><th style="color: var(--accent-blue);">Model</th><th style="color: var(--accent-blue);">Dims</th></tr></thead>
+                        <tbody>
+                            <tr><td>Embed English v3.0</td><td>1024</td></tr>
+                            <tr><td>Embed Multilingual v3.0</td><td>1024</td></tr>
+                            <tr><td>Embed English Light v3.0</td><td>384</td></tr>
+                            <tr><td>Embed Multilingual Light v3.0</td><td>384</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 19: AUTHENTICATION
+         =================================================== -->
+    <section class="slide dark-slide" aria-label="Authentication">
+        <span class="slide-number">17</span>
+        <div class="slide-content">
+            <div class="label reveal">Authentication</div>
+            <h2 class="reveal mt-sm">5 auth methods, zero hassle</h2>
+            <div class="reveal mt-md" style="display: flex; flex-direction: column; gap: 0;">
+                <div class="auth-row">
+                    <span class="auth-name text-accent">User Principal</span>
+                    <span class="auth-desc">Local dev with ~/.oci/config (default)</span>
+                </div>
+                <div class="auth-row">
+                    <span class="auth-name text-accent">API Key</span>
+                    <span class="auth-desc">Simple token-based auth, no OCI config needed</span>
+                </div>
+                <div class="auth-row">
+                    <span class="auth-name text-accent">Instance Principal</span>
+                    <span class="auth-desc">Running on OCI compute instances</span>
+                </div>
+                <div class="auth-row">
+                    <span class="auth-name text-accent">Resource Principal</span>
+                    <span class="auth-desc">OCI Functions, Data Science jobs</span>
+                </div>
+                <div class="auth-row">
+                    <span class="auth-name text-accent">Session Token</span>
+                    <span class="auth-desc">Temporary session-based authentication</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 20: CLI
+         =================================================== -->
+    <section class="slide" aria-label="CLI">
+        <div class="split-panel">
+            <div class="panel panel-dark">
+                <span class="slide-number">18</span>
+                <div class="label reveal">CLI</div>
+                <h2 class="reveal mt-sm">Everything from the terminal</h2>
+                <p class="reveal mt-sm" style="color: var(--text-muted-light);">The oci-genai command installs automatically with pip. Interactive chat, one-shot prompts, model browsing, embeddings, and full RAG operations.</p>
+            </div>
+            <div class="panel panel-white" style="justify-content: center;">
+                <div class="code-block code-block-light reveal" style="color: var(--text-dark);">
+<span class="comment"># Interactive chat</span>
+$ oci-genai chat
+
+<span class="comment"># One-shot</span>
+$ oci-genai chat <span class="string">"Explain RAG"</span>
+
+<span class="comment"># Browse models</span>
+$ oci-genai models list --vendor meta
+
+<span class="comment"># Embeddings</span>
+$ oci-genai embed <span class="string">"Oracle AI"</span>
+
+<span class="comment"># RAG ingest + query</span>
+$ oci-genai rag ingest ./docs/
+$ oci-genai rag query <span class="string">"Main findings?"</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 21: TECH STACK
+         =================================================== -->
+    <section class="slide dark-slide grid-bg" aria-label="Tech Stack">
+        <span class="slide-number">19</span>
+        <div class="slide-content">
+            <div class="label reveal">Tech Stack</div>
+            <h2 class="reveal mt-sm">What's under the hood</h2>
+            <div class="feature-grid reveal mt-md">
+                <div class="feature-card">
+                    <h3>Python 3.9+</h3>
+                    <p>Type-hinted throughout. Pydantic models for all responses.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>OCI SDK</h3>
+                    <p>Official Oracle Cloud SDK for native API calls and auth.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>OpenAI SDK</h3>
+                    <p>OpenAI-compatible endpoint routing for Llama, Grok, GPT-OSS.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Docling</h3>
+                    <p>Document loading for RAG. PDF, DOCX, HTML, and more.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Click</h3>
+                    <p>CLI framework. Subcommands for chat, models, embed, rag.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>oracledb</h3>
+                    <p>Python driver for Oracle Database and AI Vector Search.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 22: ENV CONFIG
+         =================================================== -->
+    <section class="slide dark-slide" aria-label="Configuration">
+        <span class="slide-number">20</span>
+        <div class="slide-content">
+            <div class="label reveal">Configuration</div>
+            <h2 class="reveal mt-sm">Environment variables</h2>
+            <div class="code-block reveal mt-md"><span class="comment"># Required</span>
+<span class="keyword">export</span> OCI_COMPARTMENT_ID=<span class="string">"ocid1.compartment.oc1..xxx"</span>
+
+<span class="comment"># Optional</span>
+<span class="keyword">export</span> OCI_REGION=<span class="string">"us-chicago-1"</span>           <span class="comment"># default region</span>
+<span class="keyword">export</span> OCI_PROFILE=<span class="string">"DEFAULT"</span>               <span class="comment"># OCI config profile</span>
+<span class="keyword">export</span> OCI_CONFIG_FILE=<span class="string">"~/.oci/config"</span>     <span class="comment"># OCI config path</span>
+<span class="keyword">export</span> OCI_GENAI_API_KEY=<span class="string">"your-api-key"</span>    <span class="comment"># triggers api_key auth</span></div>
+            <p class="reveal mt-sm" style="color: var(--text-muted-light);">Set OCI_COMPARTMENT_ID once and skip passing it to every GenAIClient constructor.</p>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 23: EXAMPLES
+         =================================================== -->
+    <section class="slide" aria-label="Examples">
+        <div class="split-panel">
+            <div class="panel panel-dark">
+                <span class="slide-number">21</span>
+                <div class="label reveal">Examples</div>
+                <h2 class="reveal mt-sm">10 working scripts</h2>
+                <p class="reveal mt-sm" style="color: var(--text-muted-light);">Every feature has a standalone example you can copy and run. No boilerplate, no setup maze.</p>
+            </div>
+            <div class="panel panel-white" style="color: var(--text-dark); justify-content: center;">
+                <ul class="clean-list reveal" style="gap: clamp(0.2rem, 0.6vh, 0.5rem);">
+                    <li style="color: var(--text-dark);"><strong>01</strong> &nbsp;simple_chat.py</li>
+                    <li style="color: var(--text-dark);"><strong>02</strong> &nbsp;stream_chat.py</li>
+                    <li style="color: var(--text-dark);"><strong>03</strong> &nbsp;describe_image.py</li>
+                    <li style="color: var(--text-dark);"><strong>04</strong> &nbsp;single_tool.py</li>
+                    <li style="color: var(--text-dark);"><strong>05</strong> &nbsp;embed_texts.py</li>
+                    <li style="color: var(--text-dark);"><strong>06</strong> &nbsp;rag_chatbot.py</li>
+                    <li style="color: var(--text-dark);"><strong>07</strong> &nbsp;simple_agent.py</li>
+                    <li style="color: var(--text-dark);"><strong>08</strong> &nbsp;content_moderation.py</li>
+                    <li style="color: var(--text-dark);"><strong>09</strong> &nbsp;grok_reasoning.py</li>
+                    <li style="color: var(--text-dark);"><strong>10</strong> &nbsp;list_models.py</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 24: INSTALL & DEPLOY
+         =================================================== -->
+    <section class="slide dark-slide" aria-label="Installation">
+        <span class="slide-number">22</span>
+        <div class="slide-content">
+            <div class="label reveal">Installation</div>
+            <h2 class="reveal mt-sm">Get running in 60 seconds</h2>
+            <div style="display: flex; gap: var(--content-gap); flex-wrap: wrap; margin-top: var(--content-gap);">
+                <div style="flex: 1; min-width: min(100%, 250px);">
+                    <h3 class="reveal" style="font-size: var(--body-size); font-weight: 700; color: var(--accent-blue);">One-command install</h3>
+                    <div class="code-block reveal mt-sm">curl -fsSL https://raw.githubusercontent.com/
+  jasperan/oci-genai-service/main/
+  install.sh | bash</div>
+                </div>
+                <div style="flex: 1; min-width: min(100%, 250px);">
+                    <h3 class="reveal" style="font-size: var(--body-size); font-weight: 700; color: var(--accent-blue);">Or via pip</h3>
+                    <div class="code-block reveal mt-sm">pip install oci-genai-service</div>
+                    <h3 class="reveal mt-sm" style="font-size: var(--body-size); font-weight: 700; color: var(--accent-blue);">Dev install</h3>
+                    <div class="code-block reveal mt-sm">git clone https://github.com/jasperan/
+  oci-genai-service.git
+pip install -e <span class="string">".[dev]"</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SLIDE 25: CLOSING
+         =================================================== -->
+    <section class="slide closing-slide" aria-label="Closing">
+        <div class="slide-content">
+            <h1 class="reveal">oci-genai-service</h1>
+            <div class="accent-line reveal mt-sm" style="background: var(--text-light);"></div>
+            <p class="reveal mt-sm" style="font-size: var(--h3-size); font-weight: 500; opacity: 0.9;">One client. Every OCI GenAI model.</p>
+            <div class="reveal mt-md" style="display: flex; gap: var(--content-gap); flex-wrap: wrap; justify-content: center; font-size: var(--body-size);">
+                <a href="https://pypi.org/project/oci-genai-service/">PyPI</a>
+                <a href="https://github.com/jasperan/oci-genai-service">GitHub</a>
+                <a href="https://github.com/jasperan/oci-genai-service/tree/main/examples">Examples</a>
+            </div>
+            <p class="reveal mt-md" style="font-size: var(--small-size); opacity: 0.6;">UPL-1.0 &middot; Copyright 2024, 2025 Oracle and/or its affiliates</p>
+        </div>
+    </section>
+
+    <!-- ===========================================
+         JAVASCRIPT: SLIDE PRESENTATION CONTROLLER
+         =========================================== -->
+    <script>
+        class SlidePresentation {
+            constructor() {
+                this.slides = document.querySelectorAll('.slide');
+                this.currentSlide = 0;
+                this.totalSlides = this.slides.length;
+                this.isScrolling = false;
+
+                this.setupIntersectionObserver();
+                this.setupKeyboardNav();
+                this.setupTouchNav();
+                this.setupProgressBar();
+                this.setupNavDots();
+                this.setupScrollListener();
+            }
+
+            /* --- Intersection Observer: trigger .visible on scroll --- */
+            setupIntersectionObserver() {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                            const index = Array.from(this.slides).indexOf(entry.target);
+                            if (index !== -1) {
+                                this.currentSlide = index;
+                                this.updateUI();
+                            }
+                        }
+                    });
+                }, {
+                    threshold: 0.5
+                });
+
+                this.slides.forEach(slide => observer.observe(slide));
+            }
+
+            /* --- Keyboard navigation --- */
+            setupKeyboardNav() {
+                document.addEventListener('keydown', (e) => {
+                    switch (e.key) {
+                        case 'ArrowDown':
+                        case 'ArrowRight':
+                        case ' ':
+                        case 'PageDown':
+                            e.preventDefault();
+                            this.goToSlide(this.currentSlide + 1);
+                            break;
+                        case 'ArrowUp':
+                        case 'ArrowLeft':
+                        case 'PageUp':
+                            e.preventDefault();
+                            this.goToSlide(this.currentSlide - 1);
+                            break;
+                        case 'Home':
+                            e.preventDefault();
+                            this.goToSlide(0);
+                            break;
+                        case 'End':
+                            e.preventDefault();
+                            this.goToSlide(this.totalSlides - 1);
+                            break;
+                    }
+                });
+            }
+
+            /* --- Touch / swipe support --- */
+            setupTouchNav() {
+                let touchStartY = 0;
+                let touchStartX = 0;
+
+                document.addEventListener('touchstart', (e) => {
+                    touchStartY = e.touches[0].clientY;
+                    touchStartX = e.touches[0].clientX;
+                }, { passive: true });
+
+                document.addEventListener('touchend', (e) => {
+                    const touchEndY = e.changedTouches[0].clientY;
+                    const touchEndX = e.changedTouches[0].clientX;
+                    const diffY = touchStartY - touchEndY;
+                    const diffX = touchStartX - touchEndX;
+
+                    /* Only act on vertical swipes larger than 50px */
+                    if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 50) {
+                        if (diffY > 0) {
+                            this.goToSlide(this.currentSlide + 1);
+                        } else {
+                            this.goToSlide(this.currentSlide - 1);
+                        }
+                    }
+                }, { passive: true });
+            }
+
+            /* --- Progress bar --- */
+            setupProgressBar() {
+                this.progressBar = document.getElementById('progressBar');
+                this.updateProgressBar();
+            }
+
+            updateProgressBar() {
+                const progress = ((this.currentSlide + 1) / this.totalSlides) * 100;
+                this.progressBar.style.width = progress + '%';
+            }
+
+            /* --- Nav dots --- */
+            setupNavDots() {
+                const container = document.getElementById('navDots');
+                this.slides.forEach((_, i) => {
+                    const dot = document.createElement('button');
+                    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+                    dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+                    dot.addEventListener('click', () => this.goToSlide(i));
+                    container.appendChild(dot);
+                });
+                this.dots = container.querySelectorAll('.nav-dot');
+            }
+
+            /* --- Scroll listener for counter updates --- */
+            setupScrollListener() {
+                let scrollTimeout;
+                document.addEventListener('scroll', () => {
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        this.updateUI();
+                    }, 50);
+                }, { passive: true });
+            }
+
+            /* --- Navigate to slide --- */
+            goToSlide(index) {
+                if (index < 0 || index >= this.totalSlides) return;
+                this.currentSlide = index;
+                this.slides[index].scrollIntoView({ behavior: 'smooth' });
+                this.updateUI();
+            }
+
+            /* --- Update all UI elements --- */
+            updateUI() {
+                /* Counter */
+                document.getElementById('slideCounter').textContent =
+                    `${this.currentSlide + 1} / ${this.totalSlides}`;
+
+                /* Progress bar */
+                this.updateProgressBar();
+
+                /* Nav dots */
+                if (this.dots) {
+                    this.dots.forEach((dot, i) => {
+                        dot.classList.toggle('active', i === this.currentSlide);
+                    });
+                }
+            }
+        }
+
+        /* Initialize on DOM ready */
+        document.addEventListener('DOMContentLoaded', () => {
+            new SlidePresentation();
+        });
+    </script>
+</body>
+</html>
