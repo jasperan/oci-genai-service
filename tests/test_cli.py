@@ -10,7 +10,8 @@ class TestCLI:
         runner = CliRunner()
         result = runner.invoke(cli, ["--version"])
         assert result.exit_code == 0
-        assert "2.0.0" in result.output
+        from oci_genai_service import __version__
+        assert __version__ in result.output
 
     def test_models_list(self):
         runner = CliRunner()
