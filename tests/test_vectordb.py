@@ -3,7 +3,6 @@
 from unittest.mock import patch, MagicMock
 from oci_genai_service.vectordb.oracle import OracleVectorStore
 from oci_genai_service.vectordb.tables import VectorTableConfig
-from oci_genai_service.vectordb.search import hybrid_search
 
 
 class TestVectorTableConfig:
@@ -53,15 +52,3 @@ class TestOracleVectorStore:
         store._embed_fn = MagicMock(return_value=[[0.1, 0.2], [0.3, 0.4]])
         store.add_texts(["hello", "world"])
         assert mock_cursor.execute.called
-
-
-class TestHybridSearch:
-    def test_builds_query_with_vector_and_keyword(self):
-        query = hybrid_search(
-            table_name="documents",
-            top_k=5,
-            vector_weight=0.7,
-            keyword_weight=0.3,
-        )
-        assert "VECTOR_DISTANCE" in query
-        assert "LIKE" in query

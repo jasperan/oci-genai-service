@@ -31,7 +31,6 @@ class OracleVectorStore:
         password: str,
         table_name: str = "documents",
         vector_dims: int = 1024,
-        embedding_model: Optional[str] = None,
         embed_fn: Optional[Callable] = None,
         auto_create_table: bool = True,
     ):
@@ -41,7 +40,6 @@ class OracleVectorStore:
             table_name=table_name,
             vector_dims=vector_dims,
         )
-        self.embedding_model = embedding_model
         self._embed_fn = embed_fn
 
         if auto_create_table:

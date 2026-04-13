@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
-from oci_genai_service.vectordb.oracle import OracleVectorStore
-from oci_genai_service.vectordb.tables import validate_identifier
+if TYPE_CHECKING:
+    from oci_genai_service.vectordb.oracle import OracleVectorStore
 
 
 class BaseMemory(ABC):
@@ -45,7 +45,8 @@ class InMemoryMemory(BaseMemory):
 class OracleMemory(BaseMemory):
     """Oracle-backed conversation memory with vector search for long-term recall."""
 
-    def __init__(self, store: OracleVectorStore, table_name: str = "conversations"):
+    def __init__(self, store: "OracleVectorStore", table_name: str = "conversations"):
+        from oci_genai_service.vectordb.tables import validate_identifier
         validate_identifier(table_name)
         self.store = store
         self.table_name = table_name
@@ -60,20 +61,16 @@ class OracleMemory(BaseMemory):
         self.store.conn.commit()
 
     def get(self, session_id: str, limit: Optional[int] = None) -> list[dict]:
+        query = f"""SELECT role, content FROM {self.table_name}
+                    WHERE session_id = :session_id ORDER BY created_at"""
+        params: dict = {"session_id": session_id}
         if limit:
-            query = f"""SELECT role, content FROM {self.table_name}
-                        WHERE session_id = :session_id ORDER BY created_at DESC
-                        FETCH FIRST :limit ROWS ONLY"""
-            with self.store.conn.cursor() as cur:
-                cur.execute(query, {"session_id": session_id, "limit": limit})
-                results = [{"role": row[0], "content": row[1]} for row in cur]
-            return list(reversed(results))
-        else:
-            query = f"""SELECT role, content FROM {self.table_name}
-                        WHERE session_id = :session_id ORDER BY created_at"""
-            with self.store.conn.cursor() as cur:
-                cur.execute(query, {"session_id": session_id})
-                return [{"role": row[0], "content": row[1]} for row in cur]
+            query += " DESC FETCH FIRST :limit ROWS ONLY"
+            params["limit"] = limit
+        with self.store.conn.cursor() as cur:
+            cur.execute(query, params)
+            results = [{"role": row[0], "content": row[1]} for row in cur]
+        return list(reversed(results)) if limit else results
 
     def clear(self, session_id: str) -> None:
         with self.store.conn.cursor() as cur:
@@ -83,7 +80,3 @@ class OracleMemory(BaseMemory):
             )
         self.store.conn.commit()
 
-    def search(self, query: str, session_id: Optional[str] = None, top_k: int = 5) -> list[dict]:
-        """Search conversation history by semantic similarity."""
-        results = self.store.search(query, top_k=top_k)
-        return [{"role": "context", "content": r.text, "score": r.score} for r in results]

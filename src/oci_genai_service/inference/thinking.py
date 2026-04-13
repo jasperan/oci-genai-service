@@ -26,7 +26,7 @@ def extract_thinking(raw_text: str) -> ThinkingResponse:
     match = _THINK_PATTERN.match(raw_text.strip())
     if match:
         return ThinkingResponse(
-            thinking=match.group(1).strip() if match.group(1).strip() else match.group(1),
+            thinking=match.group(1).strip(),
             answer=match.group(2).strip(),
         )
     return ThinkingResponse(thinking=None, answer=raw_text.strip())

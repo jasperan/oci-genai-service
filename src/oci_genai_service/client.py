@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import copy
+from dataclasses import replace
 from typing import TYPE_CHECKING, Iterator, Optional
 
 from oci_genai_service.auth import AuthConfig
@@ -32,7 +32,7 @@ class GenAIClient:
         profile_name: Optional[str] = None,
     ):
         if config:
-            self.config = copy.copy(config)
+            self.config = replace(config)
         elif api_key:
             self.config = AuthConfig(auth_type="api_key", api_key=api_key)
         else:

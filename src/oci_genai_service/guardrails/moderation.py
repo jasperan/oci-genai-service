@@ -28,19 +28,11 @@ class Guardrail:
 
     def __init__(
         self,
-        content_moderation: bool = False,  # Not yet implemented — reserved for OCI AI Guardrails API
         pii_detection: bool = False,
         prompt_injection: bool = False,
-        config_file: str = "~/.oci/config",
-        profile_name: str = "DEFAULT",
-        region: str = "us-chicago-1",
     ):
-        self.content_moderation = content_moderation
         self.pii_detection = pii_detection
         self.prompt_injection = prompt_injection
-        self._config_file = config_file
-        self._profile_name = profile_name
-        self._region = region
 
     def check(self, text: str) -> GuardrailResult:
         """Check text against enabled guardrails."""

@@ -5,8 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Iterator, Optional, Any
 
-from oci_openai import OciOpenAI
-
 from oci_genai_service.auth import AuthConfig, create_auth, get_base_url
 
 
@@ -41,6 +39,7 @@ def chat_completion(
         from openai import OpenAI
         openai_client = OpenAI(**client_kwargs)
     else:
+        from oci_openai import OciOpenAI
         client_kwargs["auth"] = auth
         client_kwargs["compartment_id"] = compartment_id
         openai_client = OciOpenAI(**client_kwargs)
