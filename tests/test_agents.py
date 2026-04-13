@@ -1,7 +1,6 @@
 """Tests for the agent framework."""
 
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 from oci_genai_service.agents.agent import Agent
 from oci_genai_service.agents.memory import InMemoryMemory
 from oci_genai_service.inference.tools import tool

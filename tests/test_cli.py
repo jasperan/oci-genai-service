@@ -1,6 +1,5 @@
 """Tests for the CLI."""
 
-import pytest
 from click.testing import CliRunner
 from oci_genai_service.cli.main import cli
 

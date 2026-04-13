@@ -1,6 +1,5 @@
 """Tests for Oracle Vector Search module."""
 
-import pytest
 from unittest.mock import patch, MagicMock
 from oci_genai_service.vectordb.oracle import OracleVectorStore
 from oci_genai_service.vectordb.tables import VectorTableConfig
@@ -29,7 +28,7 @@ class TestOracleVectorStore:
         mock_conn = MagicMock()
         mock_oracledb.connect.return_value = mock_conn
 
-        store = OracleVectorStore(
+        OracleVectorStore(
             dsn="localhost:1521/FREEPDB1",
             user="genai",
             password="genai",

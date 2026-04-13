@@ -1,6 +1,5 @@
 """Tests for vision/multimodal support."""
 
-import pytest
 from oci_genai_service.inference.vision import build_vision_messages
 
 

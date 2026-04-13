@@ -5,11 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Iterator, Optional, Any
 
-from openai.types.chat import ChatCompletion
 from oci_openai import OciOpenAI
 
 from oci_genai_service.auth import AuthConfig, create_auth, get_base_url
-from oci_genai_service.models import get_model
 
 
 @dataclass

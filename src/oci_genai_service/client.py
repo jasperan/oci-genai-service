@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import copy
-from typing import Iterator, Optional
+from typing import TYPE_CHECKING, Iterator, Optional
 
-from oci_genai_service.auth import AuthConfig, create_auth
+from oci_genai_service.auth import AuthConfig
+
+if TYPE_CHECKING:
+    from oci_genai_service.inference.embeddings import EmbeddingResponse
 from oci_genai_service.inference.chat import ChatResponse, chat_completion
 
 
@@ -100,7 +103,7 @@ class GenAIClient:
         input_type: str = "SEARCH_DOCUMENT",
     ) -> "EmbeddingResponse":
         """Generate text embeddings via native OCI SDK."""
-        from oci_genai_service.inference.embeddings import embed_texts, EmbeddingResponse
+        from oci_genai_service.inference.embeddings import embed_texts
         return embed_texts(
             config=self.config,
             compartment_id=self.config.compartment_id,

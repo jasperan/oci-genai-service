@@ -160,3 +160,12 @@ cython_debug/
 #.idea/
 
 data-plane/config.yaml
+
+# Claude-generated output
+docs/plans/
+dogfood-output/
+task_plan.md
+findings.md
+progress.md
+.playwright-mcp/
+CLAUDE.md

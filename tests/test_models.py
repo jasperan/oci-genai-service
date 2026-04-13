@@ -1,7 +1,7 @@
 """Tests for model registry."""
 
 import pytest
-from oci_genai_service.models import ModelInfo, list_models, get_model
+from oci_genai_service.models import list_models, get_model
 
 
 class TestModelInfo:

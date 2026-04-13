@@ -1,6 +1,5 @@
 """Tests for function/tool calling support."""
 
-import pytest
 from oci_genai_service.inference.tools import tool, build_tool_schema
 
 

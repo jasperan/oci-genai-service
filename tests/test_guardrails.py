@@ -1,6 +1,5 @@
 """Tests for guardrails module."""
 
-import pytest
 from oci_genai_service.guardrails.moderation import Guardrail, GuardrailResult
 
 

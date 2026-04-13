@@ -44,7 +44,7 @@ class TestCreateAuth:
         config = AuthConfig(auth_type="user_principal")
         with patch("oci_genai_service.auth.OciUserPrincipalAuth") as mock_auth:
             mock_auth.return_value = MagicMock()
-            auth = create_auth(config)
+            create_auth(config)
             mock_auth.assert_called_once_with(
                 profile_name="DEFAULT",
                 config_file="~/.oci/config",

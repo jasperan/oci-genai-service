@@ -1,7 +1,6 @@
 """Tests for the unified GenAI client."""
 
-import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import patch, MagicMock
 from oci_genai_service.client import GenAIClient
 from oci_genai_service.auth import AuthConfig
 
@@ -50,7 +49,7 @@ class TestGenAIClientChat:
         mock_openai_cls.return_value = mock_client
 
         client = GenAIClient(api_key="sk-test", compartment_id="ocid1.compartment.oc1..test")
-        result = client.chat("Who are you?", model="meta.llama-4-maverick", system_prompt="You are helpful")
+        client.chat("Who are you?", model="meta.llama-4-maverick", system_prompt="You are helpful")
 
         call_args = mock_client.chat.completions.create.call_args
         messages = call_args.kwargs.get("messages") or call_args[1].get("messages")

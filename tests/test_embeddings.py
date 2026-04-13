@@ -1,8 +1,7 @@
 """Tests for embeddings via native OCI SDK."""
 
-import pytest
 from unittest.mock import patch, MagicMock
-from oci_genai_service.inference.embeddings import embed_texts, EmbeddingResponse
+from oci_genai_service.inference.embeddings import embed_texts
 
 
 class TestEmbedTexts:
@@ -35,7 +34,7 @@ class TestEmbedTexts:
         mock_client.embed_text.return_value = mock_response
         mock_client_cls.return_value = mock_client
 
-        result = embed_texts(
+        embed_texts(
             config=MagicMock(config_file="~/.oci/config", profile_name="DEFAULT", region="us-chicago-1"),
             compartment_id="ocid1.test",
             texts=["hello", "", "  "],

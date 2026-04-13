@@ -1,7 +1,6 @@
 """Tests for thinking trace extraction."""
 
-import pytest
-from oci_genai_service.inference.thinking import extract_thinking, ThinkingResponse
+from oci_genai_service.inference.thinking import extract_thinking
 
 
 class TestExtractThinking:

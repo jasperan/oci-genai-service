@@ -2,11 +2,10 @@
 
 import sys
 import types
-import pytest
 from unittest.mock import patch, MagicMock
 from oci_genai_service.rag.chunkers import RecursiveChunker, Chunk
 from oci_genai_service.rag.loaders import load_document
-from oci_genai_service.rag.pipeline import RAGPipeline, RAGResponse
+from oci_genai_service.rag.pipeline import RAGResponse
 
 
 class TestRecursiveChunker:
