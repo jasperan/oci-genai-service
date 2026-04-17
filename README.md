@@ -50,7 +50,7 @@ pip install oci-genai-service
 ## Quick Start
 
 <!-- one-command-install -->
-> **One-command install** — clone, configure, and run in a single step:
+> **One-command install** (clone, configure, and run in a single step):
 >
 > ```bash
 > curl -fsSL https://raw.githubusercontent.com/jasperan/oci-genai-service/main/install.sh | bash
@@ -325,15 +325,15 @@ The `OracleVectorStore` will auto-create the vector table on first use.
 
 See the [`examples/`](examples/) directory for complete working examples:
 
-- `chat_basic.py` — simple chat completion
-- `chat_streaming.py` — streaming output
-- `vision.py` — image analysis with vision models
-- `function_calling.py` — tool use with `@tool` decorator
-- `embeddings.py` — text embeddings
-- `rag_pipeline.py` — full RAG with Oracle Vector Search
-- `agent.py` — tool-calling agent with memory
-- `guardrails.py` — content moderation and PII detection
-- `thinking.py` — reasoning trace extraction
+- `chat_basic.py`: simple chat completion
+- `chat_streaming.py`: streaming output
+- `vision.py`: image analysis with vision models
+- `function_calling.py`: tool use with `@tool` decorator
+- `embeddings.py`: text embeddings
+- `rag_pipeline.py`: full RAG with Oracle Vector Search
+- `agent.py`: tool-calling agent with memory
+- `guardrails.py`: content moderation and PII detection
+- `thinking.py`: reasoning trace extraction
 
 ## License
 
