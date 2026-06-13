@@ -12,10 +12,17 @@ from oci_genai_service.agents.memory import BaseMemory, InMemoryMemory
 class AgentResponse:
     """Response from an agent run."""
 
-    def __init__(self, text: str, tool_calls: list[dict] = None, steps: int = 0):
+    def __init__(
+        self,
+        text: str,
+        tool_calls: Optional[list[dict]] = None,
+        steps: int = 0,
+        stopped_reason: Optional[str] = None,
+    ):
         self.text = text
         self.tool_calls = tool_calls or []
         self.steps = steps
+        self.stopped_reason = stopped_reason
 
 
 class Agent:
@@ -30,6 +37,8 @@ class Agent:
         system_prompt: Optional[str] = None,
         max_iterations: int = 10,
     ):
+        if max_iterations < 1:
+            raise ValueError("max_iterations must be >= 1")
         self.client = client
         self.model = model
         self.tools = tools or []
@@ -93,7 +102,12 @@ class Agent:
                 )
 
         self.memory.add(session_id, "assistant", response.text)
-        return AgentResponse(text=response.text, tool_calls=all_tool_calls, steps=self.max_iterations)
+        return AgentResponse(
+            text=response.text,
+            tool_calls=all_tool_calls,
+            steps=self.max_iterations,
+            stopped_reason="max_iterations",
+        )
 
     def session(self, session_id: str) -> "AgentSession":
         """Create a named session for multi-turn conversations."""

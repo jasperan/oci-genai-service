@@ -11,13 +11,19 @@ from typing import Literal, Optional
 
 from oci_openai import OciUserPrincipalAuth
 
-OCI_GENAI_URL_TEMPLATE = "https://inference.generativeai.{region}.oci.oraclecloud.com/20231130/actions/v1"
+OCI_GENAI_HOST_TEMPLATE = "https://inference.generativeai.{region}.oci.oraclecloud.com"
+OCI_GENAI_URL_TEMPLATE = OCI_GENAI_HOST_TEMPLATE + "/20231130/actions/v1"
 
 AuthType = Literal["user_principal", "instance_principal", "resource_principal", "session", "api_key"]
 
 
+def get_host(region: str) -> str:
+    """Build the bare OCI GenAI inference host for a region (used by the native SDK)."""
+    return OCI_GENAI_HOST_TEMPLATE.format(region=region)
+
+
 def get_base_url(region: str) -> str:
-    """Build the OCI GenAI inference base URL for a region."""
+    """Build the OCI GenAI inference base URL for a region (OpenAI-compatible endpoint)."""
     return OCI_GENAI_URL_TEMPLATE.format(region=region)
 
 

@@ -53,14 +53,18 @@ class OracleVectorStore:
         """Add texts to the vector store. Returns list of IDs."""
         if not self._embed_fn:
             raise RuntimeError("No embedding function set. Use set_embed_fn() or pass embed_fn to constructor.")
+        if metadatas is not None and len(metadatas) != len(texts):
+            raise ValueError(f"metadatas length ({len(metadatas)}) must match texts length ({len(texts)})")
 
         vectors = self._embed_fn(texts)
+        if len(vectors) != len(texts):
+            raise ValueError(f"embed_fn returned {len(vectors)} vectors for {len(texts)} texts")
         ids = []
 
         with self.conn.cursor() as cur:
             for i, (text, vector) in enumerate(zip(texts, vectors)):
                 doc_id = uuid.uuid4().hex
-                metadata = metadatas[i] if metadatas else None
+                metadata = metadatas[i] if metadatas is not None else None
                 cur.execute(
                     f"""INSERT INTO {self.table_config.table_name}
                     ({self.table_config.id_column}, {self.table_config.text_column},

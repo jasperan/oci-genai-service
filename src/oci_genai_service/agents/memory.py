@@ -34,7 +34,7 @@ class InMemoryMemory(BaseMemory):
 
     def get(self, session_id: str, limit: Optional[int] = None) -> list[dict]:
         messages = self._sessions[session_id]
-        if limit:
+        if limit is not None:
             return messages[-limit:]
         return list(messages)
 
@@ -61,16 +61,22 @@ class OracleMemory(BaseMemory):
         self.store.conn.commit()
 
     def get(self, session_id: str, limit: Optional[int] = None) -> list[dict]:
-        query = f"""SELECT role, content FROM {self.table_name}
-                    WHERE session_id = :session_id ORDER BY created_at"""
         params: dict = {"session_id": session_id}
-        if limit:
-            query += " DESC FETCH FIRST :limit ROWS ONLY"
+        if limit is not None:
+            # Fetch the most recent `limit` rows, then reverse back to chronological order.
+            query = f"""SELECT role, content FROM {self.table_name}
+                        WHERE session_id = :session_id
+                        ORDER BY created_at DESC
+                        FETCH FIRST :limit ROWS ONLY"""
             params["limit"] = limit
+        else:
+            query = f"""SELECT role, content FROM {self.table_name}
+                        WHERE session_id = :session_id
+                        ORDER BY created_at"""
         with self.store.conn.cursor() as cur:
             cur.execute(query, params)
             results = [{"role": row[0], "content": row[1]} for row in cur]
-        return list(reversed(results)) if limit else results
+        return list(reversed(results)) if limit is not None else results
 
     def clear(self, session_id: str) -> None:
         with self.store.conn.cursor() as cur:

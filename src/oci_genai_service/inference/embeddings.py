@@ -10,10 +10,7 @@ from oci.generative_ai_inference.models import (
     OnDemandServingMode,
 )
 
-from oci_genai_service.auth import AuthConfig
-
-
-EMBED_ENDPOINT_TEMPLATE = "https://inference.generativeai.{region}.oci.oraclecloud.com"
+from oci_genai_service.auth import AuthConfig, get_host
 
 
 @dataclass
@@ -33,18 +30,27 @@ def embed_texts(
     input_type: str = "SEARCH_DOCUMENT",
     truncate: str = "NONE",
 ) -> EmbeddingResponse:
-    """Generate embeddings for a list of texts using the native OCI SDK."""
-    clean_texts = [t for t in texts if t and t.strip()]
+    """Generate embeddings for a list of texts using the native OCI SDK.
+
+    The returned vectors align 1:1 with ``texts`` by position, so callers may
+    safely zip them together. Blank or whitespace-only inputs raise ``ValueError``
+    rather than being silently dropped (which would break that alignment).
+    """
+    if not texts:
+        raise ValueError("texts must contain at least one item")
+    blank_indices = [i for i, t in enumerate(texts) if not (t and t.strip())]
+    if blank_indices:
+        raise ValueError(f"texts contains blank entries at indices {blank_indices}")
 
     oci_config = oci.config.from_file(config.config_file, config.profile_name)
     client = GenerativeAiInferenceClient(
         config=oci_config,
-        service_endpoint=EMBED_ENDPOINT_TEMPLATE.format(region=config.region),
+        service_endpoint=get_host(config.region),
     )
 
     details = EmbedTextDetails(
         compartment_id=compartment_id,
-        inputs=clean_texts,
+        inputs=texts,
         serving_mode=OnDemandServingMode(model_id=model),
         input_type=input_type,
         truncate=truncate,
@@ -54,5 +60,5 @@ def embed_texts(
     return EmbeddingResponse(
         vectors=response.data.embeddings,
         model=model,
-        input_count=len(clean_texts),
+        input_count=len(texts),
     )

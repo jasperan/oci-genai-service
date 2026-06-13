@@ -36,7 +36,7 @@ Production-ready Python toolkit for Oracle Cloud Infrastructure Generative AI Se
 - **Oracle AI Vector Search** integration for production-grade vector storage
 - **RAG pipeline** with Docling document loading, recursive chunking, and retrieval-augmented generation
 - **Tool-calling agent** with memory, multi-turn sessions, and configurable reasoning loops
-- **Guardrails** for content moderation, PII detection, and prompt injection defense
+- **Guardrails** for local PII detection and prompt injection screening
 - **Thinking trace extraction** for reasoning models (Grok Code, GPT-OSS)
 - **CLI** for interactive chat, model browsing, embeddings, and RAG operations
 - **5 auth methods**: User Principal, API Key, Instance Principal, Resource Principal, Session Token
@@ -332,7 +332,7 @@ See the [`examples/`](examples/) directory for complete working examples:
 - `embeddings.py`: text embeddings
 - `rag_pipeline.py`: full RAG with Oracle Vector Search
 - `agent.py`: tool-calling agent with memory
-- `guardrails.py`: content moderation and PII detection
+- `guardrails.py`: PII detection and prompt injection screening
 - `thinking.py`: reasoning trace extraction
 
 ## License

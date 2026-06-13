@@ -1,4 +1,8 @@
-"""OCI AI Guardrails — content moderation, PII detection, prompt injection."""
+"""Heuristic local guardrails — PII detection and prompt-injection screening.
+
+These are lightweight, dependency-free checks (substring and regex matching)
+that run entirely client-side. They do not call any OCI service.
+"""
 
 from __future__ import annotations
 
@@ -17,10 +21,10 @@ class GuardrailResult:
 
 
 class Guardrail:
-    """Content safety guardrail using OCI AI Guardrails.
+    """Heuristic content-safety guardrail (local, no OCI calls).
 
     Usage:
-        guard = Guardrail(content_moderation=True, pii_detection=True)
+        guard = Guardrail(pii_detection=True, prompt_injection=True)
         result = guard.check("some user input")
         if result.blocked:
             print(result.reason)
@@ -57,9 +61,11 @@ class Guardrail:
         if self.pii_detection:
             if re.search(r"\b\d{3}-\d{2}-\d{4}\b", text):  # SSN
                 flags.append("pii_ssn")
+                blocked = True
                 reasons.append("Social Security Number detected")
             if re.search(r"\b\d{16}\b", text):  # Credit card
                 flags.append("pii_credit_card")
+                blocked = True
                 reasons.append("Credit card number detected")
 
         return GuardrailResult(

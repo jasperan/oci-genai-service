@@ -73,9 +73,11 @@ class GenAIClient:
             ChatResponse (non-streaming) or Iterator[str] (streaming).
         """
         if images:
+            if not isinstance(prompt, str):
+                raise ValueError("images require a string prompt, not a message list")
             from oci_genai_service.inference.vision import build_vision_messages
             actual_prompt = build_vision_messages(
-                prompt if isinstance(prompt, str) else prompt[-1]["content"],
+                prompt,
                 images=images,
                 system_prompt=system_prompt,
             )

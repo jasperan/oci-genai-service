@@ -10,7 +10,6 @@ Requirements:
 from oci_genai_service.guardrails import Guardrail
 
 guard = Guardrail(
-    content_moderation=True,
     pii_detection=True,
     prompt_injection=True,
 )

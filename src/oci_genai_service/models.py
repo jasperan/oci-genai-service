@@ -23,158 +23,86 @@ class ModelInfo:
     embedding_dims: Optional[int] = None
 
 
-_MODELS: dict[str, ModelInfo] = {}
+# Region shorthands keep the table below readable.
+_US = ("us-chicago-1",)
+_US_EU = ("us-chicago-1", "eu-frankfurt-1")
+_US_EU_AP = ("us-chicago-1", "eu-frankfurt-1", "ap-osaka-1")
+_US_EU_AP_ASH = ("us-chicago-1", "eu-frankfurt-1", "ap-osaka-1", "us-ashburn-1")
+
+# Common capability bundles.
+_CHAT_FN = ("chat", "function_calling", "streaming")
+_CHAT = ("chat", "streaming")
+_CHAT_VISION = ("chat", "vision", "streaming")
+_CHAT_THINK = ("chat", "streaming", "thinking")
+
+# Each vendor block supplies defaults (vendor, api, context_window); each row
+# overrides only what differs. Rows are (id, name, capabilities, regions, **extra).
+_REGISTRY: list[tuple[dict, list[tuple]]] = [
+    (
+        {"vendor": "meta", "api": "openai-compatible", "context_window": 131072},
+        [
+            ("meta.llama-4-scout", "Llama 4 Scout", _CHAT_FN, _US_EU_AP),
+            ("meta.llama-4-maverick", "Llama 4 Maverick", _CHAT_FN, _US_EU_AP),
+            ("meta.llama-3.3-70b-instruct", "Llama 3.3 70B Instruct", _CHAT_FN, _US_EU_AP_ASH),
+            ("meta.llama-3.2-90b-vision-instruct", "Llama 3.2 90B Vision", _CHAT_VISION, _US),
+            ("meta.llama-3.2-11b-vision-instruct", "Llama 3.2 11B Vision", _CHAT_VISION, _US),
+            ("meta.llama-3.1-405b-instruct", "Llama 3.1 405B Instruct", _CHAT_FN, _US),
+            ("meta.llama-3.1-70b-instruct", "Llama 3.1 70B Instruct", _CHAT_FN, _US_EU),
+        ],
+    ),
+    (
+        {"vendor": "xai", "api": "openai-compatible", "context_window": 131072},
+        [
+            ("xai.grok-4.1-fast", "Grok 4.1 Fast", _CHAT, _US),
+            ("xai.grok-4", "Grok 4", _CHAT, _US),
+            ("xai.grok-4-fast", "Grok 4 Fast", _CHAT, _US),
+            ("xai.grok-3", "Grok 3", _CHAT, _US),
+            ("xai.grok-3-mini", "Grok 3 Mini", _CHAT, _US),
+            ("xai.grok-3-mini-fast", "Grok 3 Mini Fast", _CHAT, _US),
+            ("xai.grok-code-fast-1", "Grok Code Fast 1", _CHAT_THINK, _US),
+        ],
+    ),
+    (
+        {"vendor": "openai", "api": "openai-compatible", "context_window": 131072},
+        [
+            ("openai.gpt-oss-120b", "GPT-OSS 120B", _CHAT_THINK, _US_EU),
+            ("openai.gpt-oss-20b", "GPT-OSS 20B", _CHAT, _US),
+        ],
+    ),
+    (
+        # Cohere is native-API only; context_window and embedding_dims vary per row.
+        {"vendor": "cohere", "api": "native"},
+        [
+            ("cohere.command-a", "Command A", _CHAT, _US_EU, {"context_window": 262144}),
+            ("cohere.command-r-plus", "Command R+", _CHAT, _US, {"context_window": 131072}),
+            ("cohere.command-r", "Command R", _CHAT, _US, {"context_window": 131072}),
+            ("cohere.embed-english-v3.0", "Embed English v3.0", ("embedding",), _US_EU,
+             {"context_window": 512, "embedding_dims": 1024}),
+            ("cohere.embed-multilingual-v3.0", "Embed Multilingual v3.0", ("embedding",), _US_EU,
+             {"context_window": 512, "embedding_dims": 1024}),
+            ("cohere.embed-english-light-v3.0", "Embed English Light v3.0", ("embedding",), _US,
+             {"context_window": 512, "embedding_dims": 384}),
+            ("cohere.embed-multilingual-light-v3.0", "Embed Multilingual Light v3.0", ("embedding",), _US,
+             {"context_window": 512, "embedding_dims": 384}),
+        ],
+    ),
+]
 
 
-def _register(m: ModelInfo):
-    _MODELS[m.id] = m
+def _build_registry() -> dict[str, ModelInfo]:
+    models: dict[str, ModelInfo] = {}
+    for defaults, rows in _REGISTRY:
+        for row in rows:
+            model_id, name, capabilities, regions = row[:4]
+            extra = row[4] if len(row) > 4 else {}
+            models[model_id] = ModelInfo(
+                id=model_id, name=name, capabilities=capabilities, regions=regions,
+                **defaults, **extra,
+            )
+    return models
 
 
-# --- Meta Llama ---
-_register(ModelInfo(
-    id="meta.llama-4-scout", name="Llama 4 Scout", vendor="meta",
-    capabilities=("chat", "function_calling", "streaming"),
-    api="openai-compatible", context_window=131072,
-    regions=("us-chicago-1", "eu-frankfurt-1", "ap-osaka-1"),
-))
-_register(ModelInfo(
-    id="meta.llama-4-maverick", name="Llama 4 Maverick", vendor="meta",
-    capabilities=("chat", "function_calling", "streaming"),
-    api="openai-compatible", context_window=131072,
-    regions=("us-chicago-1", "eu-frankfurt-1", "ap-osaka-1"),
-))
-_register(ModelInfo(
-    id="meta.llama-3.3-70b-instruct", name="Llama 3.3 70B Instruct", vendor="meta",
-    capabilities=("chat", "function_calling", "streaming"),
-    api="openai-compatible", context_window=131072,
-    regions=("us-chicago-1", "eu-frankfurt-1", "ap-osaka-1", "us-ashburn-1"),
-))
-_register(ModelInfo(
-    id="meta.llama-3.2-90b-vision-instruct", name="Llama 3.2 90B Vision", vendor="meta",
-    capabilities=("chat", "vision", "streaming"),
-    api="openai-compatible", context_window=131072,
-    regions=("us-chicago-1",),
-))
-_register(ModelInfo(
-    id="meta.llama-3.2-11b-vision-instruct", name="Llama 3.2 11B Vision", vendor="meta",
-    capabilities=("chat", "vision", "streaming"),
-    api="openai-compatible", context_window=131072,
-    regions=("us-chicago-1",),
-))
-_register(ModelInfo(
-    id="meta.llama-3.1-405b-instruct", name="Llama 3.1 405B Instruct", vendor="meta",
-    capabilities=("chat", "function_calling", "streaming"),
-    api="openai-compatible", context_window=131072,
-    regions=("us-chicago-1",),
-))
-_register(ModelInfo(
-    id="meta.llama-3.1-70b-instruct", name="Llama 3.1 70B Instruct", vendor="meta",
-    capabilities=("chat", "function_calling", "streaming"),
-    api="openai-compatible", context_window=131072,
-    regions=("us-chicago-1", "eu-frankfurt-1"),
-))
-
-# --- xAI Grok ---
-_register(ModelInfo(
-    id="xai.grok-4.1-fast", name="Grok 4.1 Fast", vendor="xai",
-    capabilities=("chat", "streaming"),
-    api="openai-compatible", context_window=131072,
-    regions=("us-chicago-1",),
-))
-_register(ModelInfo(
-    id="xai.grok-4", name="Grok 4", vendor="xai",
-    capabilities=("chat", "streaming"),
-    api="openai-compatible", context_window=131072,
-    regions=("us-chicago-1",),
-))
-_register(ModelInfo(
-    id="xai.grok-4-fast", name="Grok 4 Fast", vendor="xai",
-    capabilities=("chat", "streaming"),
-    api="openai-compatible", context_window=131072,
-    regions=("us-chicago-1",),
-))
-_register(ModelInfo(
-    id="xai.grok-3", name="Grok 3", vendor="xai",
-    capabilities=("chat", "streaming"),
-    api="openai-compatible", context_window=131072,
-    regions=("us-chicago-1",),
-))
-_register(ModelInfo(
-    id="xai.grok-3-mini", name="Grok 3 Mini", vendor="xai",
-    capabilities=("chat", "streaming"),
-    api="openai-compatible", context_window=131072,
-    regions=("us-chicago-1",),
-))
-_register(ModelInfo(
-    id="xai.grok-3-mini-fast", name="Grok 3 Mini Fast", vendor="xai",
-    capabilities=("chat", "streaming"),
-    api="openai-compatible", context_window=131072,
-    regions=("us-chicago-1",),
-))
-_register(ModelInfo(
-    id="xai.grok-code-fast-1", name="Grok Code Fast 1", vendor="xai",
-    capabilities=("chat", "streaming", "thinking"),
-    api="openai-compatible", context_window=131072,
-    regions=("us-chicago-1",),
-))
-
-# --- OpenAI gpt-oss ---
-_register(ModelInfo(
-    id="openai.gpt-oss-120b", name="GPT-OSS 120B", vendor="openai",
-    capabilities=("chat", "streaming", "thinking"),
-    api="openai-compatible", context_window=131072,
-    regions=("us-chicago-1", "eu-frankfurt-1"),
-))
-_register(ModelInfo(
-    id="openai.gpt-oss-20b", name="GPT-OSS 20B", vendor="openai",
-    capabilities=("chat", "streaming"),
-    api="openai-compatible", context_window=131072,
-    regions=("us-chicago-1",),
-))
-
-# --- Cohere (native API only) ---
-_register(ModelInfo(
-    id="cohere.command-a", name="Command A", vendor="cohere",
-    capabilities=("chat", "streaming"),
-    api="native", context_window=262144,
-    regions=("us-chicago-1", "eu-frankfurt-1"),
-))
-_register(ModelInfo(
-    id="cohere.command-r-plus", name="Command R+", vendor="cohere",
-    capabilities=("chat", "streaming"),
-    api="native", context_window=131072,
-    regions=("us-chicago-1",),
-))
-_register(ModelInfo(
-    id="cohere.command-r", name="Command R", vendor="cohere",
-    capabilities=("chat", "streaming"),
-    api="native", context_window=131072,
-    regions=("us-chicago-1",),
-))
-_register(ModelInfo(
-    id="cohere.embed-english-v3.0", name="Embed English v3.0", vendor="cohere",
-    capabilities=("embedding",),
-    api="native", context_window=512, embedding_dims=1024,
-    regions=("us-chicago-1", "eu-frankfurt-1"),
-))
-_register(ModelInfo(
-    id="cohere.embed-multilingual-v3.0", name="Embed Multilingual v3.0", vendor="cohere",
-    capabilities=("embedding",),
-    api="native", context_window=512, embedding_dims=1024,
-    regions=("us-chicago-1", "eu-frankfurt-1"),
-))
-_register(ModelInfo(
-    id="cohere.embed-english-light-v3.0", name="Embed English Light v3.0", vendor="cohere",
-    capabilities=("embedding",),
-    api="native", context_window=512, embedding_dims=384,
-    regions=("us-chicago-1",),
-))
-_register(ModelInfo(
-    id="cohere.embed-multilingual-light-v3.0", name="Embed Multilingual Light v3.0", vendor="cohere",
-    capabilities=("embedding",),
-    api="native", context_window=512, embedding_dims=384,
-    regions=("us-chicago-1",),
-))
+_MODELS: dict[str, ModelInfo] = _build_registry()
 
 
 def get_model(model_id: str) -> ModelInfo:

@@ -59,7 +59,7 @@ def chat_completion(
         "temperature": temperature,
         "stream": stream,
     }
-    if max_tokens:
+    if max_tokens is not None:
         request_kwargs["max_tokens"] = max_tokens
     if tools:
         request_kwargs["tools"] = tools

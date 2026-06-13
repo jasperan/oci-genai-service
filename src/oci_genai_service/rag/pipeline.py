@@ -8,7 +8,6 @@ from typing import Optional
 from oci_genai_service.client import GenAIClient
 from oci_genai_service.rag.loaders import load_document
 from oci_genai_service.rag.chunkers import RecursiveChunker
-from oci_genai_service.rag.retriever import Retriever
 from oci_genai_service.vectordb.oracle import OracleVectorStore
 
 
@@ -38,7 +37,7 @@ class RAGPipeline:
         self.chat_model = chat_model
         self.embedding_model = embedding_model
         self.chunker = RecursiveChunker(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-        self.retriever = Retriever(store=vector_store, top_k=top_k)
+        self.top_k = top_k
 
         def _embed(texts: list[str]) -> list[list[float]]:
             result = self.client.embed(texts, model=self.embedding_model, input_type="SEARCH_DOCUMENT")
@@ -62,11 +61,11 @@ class RAGPipeline:
 
     def query(self, question: str, system_prompt: Optional[str] = None) -> RAGResponse:
         """Query the RAG pipeline: retrieve -> generate with context."""
-        retrieval = self.retriever.retrieve(question)
+        chunks = self.store.search(question, top_k=self.top_k)
 
         context_parts = []
         sources = []
-        for result in retrieval.chunks:
+        for result in chunks:
             context_parts.append(result.text)
             sources.append({
                 "chunk": result.text[:200],

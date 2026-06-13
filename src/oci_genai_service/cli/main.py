@@ -136,24 +136,40 @@ def rag():
     pass
 
 
-@rag.command("ingest")
-@click.argument("path")
-@click.option("--dsn", required=True, help="Oracle DB DSN (e.g. localhost:1521/FREEPDB1)")
-@click.option("--user", default="genai", help="DB username")
-@click.option("--password", default="genai", help="DB password")
-@click.option("--table", default="documents", help="Vector table name")
-@click.option("--model", "-m", default="meta.llama-4-maverick", help="Chat model")
-@click.option("--compartment-id", envvar="OCI_COMPARTMENT_ID", help="OCI compartment OCID")
-def rag_ingest(path, dsn, user, password, table, model, compartment_id):
-    """Ingest documents into the RAG pipeline."""
-    from pathlib import Path
+def db_options(f):
+    """Shared Oracle DB + model + compartment options for RAG commands."""
+    options = [
+        click.option("--dsn", required=True, help="Oracle DB DSN (e.g. localhost:1521/FREEPDB1)"),
+        click.option("--user", default="genai", help="DB username"),
+        click.option("--password", default="genai", help="DB password"),
+        click.option("--table", default="documents", help="Vector table name"),
+        click.option("--model", "-m", default="meta.llama-4-maverick", help="Chat model"),
+        click.option("--compartment-id", envvar="OCI_COMPARTMENT_ID", help="OCI compartment OCID"),
+    ]
+    for option in reversed(options):
+        f = option(f)
+    return f
+
+
+def _make_pipeline(dsn, user, password, table, model, compartment_id):
+    """Build a RAGPipeline from the shared DB options."""
     from oci_genai_service.client import GenAIClient
     from oci_genai_service.vectordb.oracle import OracleVectorStore
     from oci_genai_service.rag.pipeline import RAGPipeline
 
     client = GenAIClient(compartment_id=compartment_id)
     store = OracleVectorStore(dsn=dsn, user=user, password=password, table_name=table)
-    pipeline = RAGPipeline(client=client, vector_store=store, chat_model=model)
+    return RAGPipeline(client=client, vector_store=store, chat_model=model)
+
+
+@rag.command("ingest")
+@click.argument("path")
+@db_options
+def rag_ingest(path, dsn, user, password, table, model, compartment_id):
+    """Ingest documents into the RAG pipeline."""
+    from pathlib import Path
+
+    pipeline = _make_pipeline(dsn, user, password, table, model, compartment_id)
 
     p = Path(path)
     if p.is_dir():
@@ -172,21 +188,10 @@ def rag_ingest(path, dsn, user, password, table, model, compartment_id):
 
 @rag.command("query")
 @click.argument("question")
-@click.option("--dsn", required=True, help="Oracle DB DSN")
-@click.option("--user", default="genai", help="DB username")
-@click.option("--password", default="genai", help="DB password")
-@click.option("--table", default="documents", help="Vector table name")
-@click.option("--model", "-m", default="meta.llama-4-maverick", help="Chat model")
-@click.option("--compartment-id", envvar="OCI_COMPARTMENT_ID", help="OCI compartment OCID")
+@db_options
 def rag_query(question, dsn, user, password, table, model, compartment_id):
     """Query the RAG pipeline."""
-    from oci_genai_service.client import GenAIClient
-    from oci_genai_service.vectordb.oracle import OracleVectorStore
-    from oci_genai_service.rag.pipeline import RAGPipeline
-
-    client = GenAIClient(compartment_id=compartment_id)
-    store = OracleVectorStore(dsn=dsn, user=user, password=password, table_name=table)
-    pipeline = RAGPipeline(client=client, vector_store=store, chat_model=model)
+    pipeline = _make_pipeline(dsn, user, password, table, model, compartment_id)
 
     result = pipeline.query(question)
     click.echo(result.text)
