@@ -20,6 +20,10 @@ class RecursiveChunker:
     """Recursive text splitter with configurable size and overlap."""
 
     def __init__(self, chunk_size: int = 512, chunk_overlap: int = 50):
+        if chunk_size < 1:
+            raise ValueError("chunk_size must be >= 1")
+        if not 0 <= chunk_overlap < chunk_size:
+            raise ValueError("chunk_overlap must satisfy 0 <= chunk_overlap < chunk_size")
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
 
@@ -52,8 +56,8 @@ class RecursiveChunker:
                 metadata={**meta},
             ))
             idx += 1
-            start += len(chunk_text) - self.chunk_overlap
-            if len(chunk_text) <= self.chunk_overlap:
-                break
+            if end >= len(text):
+                break  # final chunk emitted; continuing would only duplicate its overlap tail
+            start += max(len(chunk_text) - self.chunk_overlap, 1)
 
         return chunks
