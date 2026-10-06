@@ -108,6 +108,8 @@ class OracleVectorStore:
 
     def delete(self, ids: list[str]) -> int:
         """Delete documents by ID."""
+        if not ids:
+            return 0
         with self.conn.cursor() as cur:
             placeholders = ", ".join([f":id{i}" for i in range(len(ids))])
             cur.execute(
