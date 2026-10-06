@@ -61,7 +61,11 @@ class RAGPipeline:
 
     def query(self, question: str, system_prompt: Optional[str] = None) -> RAGResponse:
         """Query the RAG pipeline: retrieve -> generate with context."""
-        chunks = self.store.search(question, top_k=self.top_k)
+        # Cohere embed v3 is asymmetric: queries need SEARCH_QUERY, documents SEARCH_DOCUMENT.
+        query_vector = self.client.embed(
+            [question], model=self.embedding_model, input_type="SEARCH_QUERY"
+        ).vectors[0]
+        chunks = self.store.search(question, top_k=self.top_k, query_vector=query_vector)
 
         context_parts = []
         sources = []
