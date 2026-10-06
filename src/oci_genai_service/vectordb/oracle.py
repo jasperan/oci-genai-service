@@ -122,7 +122,7 @@ class OracleVectorStore:
         if not ids:
             return 0
         with self.conn.cursor() as cur:
-            placeholders = ", ".join([f":id{i}" for i in range(len(ids))])
+            placeholders = ", ".join([f"HEXTORAW(:id{i})" for i in range(len(ids))])
             cur.execute(
                 f"DELETE FROM {self.table_config.table_name} WHERE {self.table_config.id_column} IN ({placeholders})",
                 {f"id{i}": doc_id for i, doc_id in enumerate(ids)},
