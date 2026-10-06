@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import array
 import json
 import uuid
 from dataclasses import dataclass
@@ -10,6 +11,16 @@ from typing import Callable, Optional
 import oracledb
 
 from oci_genai_service.vectordb.tables import VectorTableConfig, create_vector_table, validate_identifier
+
+
+def _vec(values) -> array.array:
+    """Python lists cannot be bound to VECTOR columns (ORA-01484); the table is FLOAT64."""
+    return array.array("d", values)
+
+
+def _read(value):
+    """CLOB columns come back as LOB handles; materialise them as str."""
+    return value.read() if hasattr(value, "read") else value
 
 
 @dataclass
@@ -73,7 +84,7 @@ class OracleVectorStore:
                     {
                         "id": doc_id,
                         "text": text,
-                        "vector": vector,
+                        "vector": _vec(vector),
                         "metadata": json.dumps(metadata) if metadata else None,
                     },
                 )
@@ -95,14 +106,14 @@ class OracleVectorStore:
                 FROM {self.table_config.table_name}
                 ORDER BY distance ASC
                 FETCH FIRST :top_k ROWS ONLY""",
-                {"qvec": query_vector, "top_k": top_k},
+                {"qvec": _vec(query_vector), "top_k": top_k},
             )
             results = []
             for row in cur:
                 results.append(SearchResult(
-                    text=row[0],
+                    text=_read(row[0]),
                     score=1 - (row[2] or 0),
-                    metadata=json.loads(row[1]) if row[1] else None,
+                    metadata=json.loads(row[1]) if isinstance(row[1], (str, bytes)) else (row[1] or None),
                 ))
         return results
 

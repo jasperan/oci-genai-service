@@ -75,7 +75,7 @@ class OracleMemory(BaseMemory):
                         ORDER BY created_at"""
         with self.store.conn.cursor() as cur:
             cur.execute(query, params)
-            results = [{"role": row[0], "content": row[1]} for row in cur]
+            results = [{"role": row[0], "content": row[1].read() if hasattr(row[1], "read") else row[1]} for row in cur]
         return list(reversed(results)) if limit is not None else results
 
     def clear(self, session_id: str) -> None:
