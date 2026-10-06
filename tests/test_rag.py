@@ -5,7 +5,7 @@ import types
 from unittest.mock import patch, MagicMock
 from oci_genai_service.rag.chunkers import RecursiveChunker, Chunk
 from oci_genai_service.rag.loaders import load_document
-from oci_genai_service.rag.pipeline import RAGResponse
+from oci_genai_service.rag.pipeline import RAGPipeline, RAGResponse
 
 
 class TestRecursiveChunker:
@@ -27,6 +27,40 @@ class TestRecursiveChunker:
         chunker = RecursiveChunker(chunk_size=100, chunk_overlap=0)
         chunks = chunker.chunk("", source="empty.txt")
         assert len(chunks) == 0
+
+    def test_no_duplicate_tail_chunk(self):
+        chunker = RecursiveChunker(chunk_size=100, chunk_overlap=20)
+        text = "".join(chr(97 + i % 26) for i in range(130))
+        chunks = chunker.chunk(text, source="t")
+        assert len(chunks) == 2
+        assert chunks[0].text + chunks[1].text[20:] == text
+
+    def test_covers_whole_text_and_terminates(self):
+        chunker = RecursiveChunker(chunk_size=30, chunk_overlap=10)
+        text = " ".join(f"word{i}" for i in range(100))
+        chunks = chunker.chunk(text, source="t")
+        assert text.endswith(chunks[-1].text)
+        assert chunks[0].text == text[: len(chunks[0].text)]
+
+    def test_overlap_must_be_smaller_than_size(self):
+        import pytest
+        with pytest.raises(ValueError):
+            RecursiveChunker(chunk_size=10, chunk_overlap=10)
+
+
+class TestPipelineQuery:
+    def test_query_embeds_with_search_query_input_type(self):
+        client = MagicMock()
+        client.embed.return_value.vectors = [[0.5, 0.5]]
+        client.chat.return_value.text = "answer"
+        store = MagicMock()
+        store.search.return_value = []
+        pipeline = RAGPipeline(client=client, vector_store=store)
+
+        pipeline.query("what?")
+
+        assert client.embed.call_args.kwargs["input_type"] == "SEARCH_QUERY"
+        assert store.search.call_args.kwargs["query_vector"] == [0.5, 0.5]
 
 
 class TestLoadDocument:

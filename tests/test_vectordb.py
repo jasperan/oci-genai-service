@@ -52,3 +52,12 @@ class TestOracleVectorStore:
         store._embed_fn = MagicMock(return_value=[[0.1, 0.2], [0.3, 0.4]])
         store.add_texts(["hello", "world"])
         assert mock_cursor.execute.called
+
+
+class TestDeleteEmpty:
+    @patch("oci_genai_service.vectordb.oracle.create_vector_table")
+    @patch("oci_genai_service.vectordb.oracle.oracledb")
+    def test_delete_empty_ids_is_noop(self, mock_oracledb, mock_create_table):
+        store = OracleVectorStore(dsn="d", user="u", password="p")
+        assert store.delete([]) == 0
+        store.conn.cursor.assert_not_called()
