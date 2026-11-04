@@ -18,12 +18,12 @@ Production-ready Python toolkit for Oracle Cloud Infrastructure Generative AI Se
 <td><img src="docs/slides/slide-02.png" alt="Overview" width="400"/></td>
 </tr>
 <tr>
-<td><img src="docs/slides/slide-03.png" alt="Architecture" width="400"/></td>
-<td><img src="docs/slides/slide-04.png" alt="Features" width="400"/></td>
+<td><img src="docs/slides/slide-03.png" alt="Capabilities" width="400"/></td>
+<td><img src="docs/slides/slide-04.png" alt="Architecture" width="400"/></td>
 </tr>
 <tr>
-<td><img src="docs/slides/slide-05.png" alt="Tech Stack" width="400"/></td>
-<td><img src="docs/slides/slide-06.png" alt="Getting Started" width="400"/></td>
+<td><img src="docs/slides/slide-05.png" alt="Tech stack" width="400"/></td>
+<td><img src="docs/slides/slide-06.png" alt="Quick start" width="400"/></td>
 </tr>
 </table>
 
