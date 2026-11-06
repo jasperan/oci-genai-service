@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import json
 from typing import Optional
 
@@ -52,6 +53,35 @@ class Agent:
             self._tool_map[t.__name__] = t
             self._tool_schemas.append(t.schema)
 
+    def _call_tool(self, fn_name: str, fn_args: dict) -> str:
+        """Call a registered tool only with arguments its signature can accept."""
+        fn = self._tool_map.get(fn_name)
+        if fn is None:
+            return f"Error: unknown tool '{fn_name}'"
+        try:
+            parameters = inspect.signature(fn).parameters
+        except (TypeError, ValueError):
+            parameters = None
+        if parameters is not None and not any(
+            p.kind is inspect.Parameter.VAR_KEYWORD for p in parameters.values()
+        ):
+            allowed = {name for name in parameters if name not in ("self", "cls")}
+            unknown = sorted(set(fn_args) - allowed)
+            if unknown:
+                return f"Error: unknown argument(s) for tool '{fn_name}': {', '.join(unknown)}"
+            missing = sorted(
+                name
+                for name, parameter in parameters.items()
+                if name not in ("self", "cls")
+                and name not in fn_args
+                and parameter.default is inspect.Parameter.empty
+                and parameter.kind
+                in (inspect.Parameter.POSITIONAL_OR_KEYWORD, inspect.Parameter.KEYWORD_ONLY)
+            )
+            if missing:
+                return f"Error: missing argument(s) for tool '{fn_name}': {', '.join(missing)}"
+        return str(fn(**fn_args))
+
     def run(self, prompt: str, session_id: str = "default") -> AgentResponse:
         """Run the agent on a prompt."""
         self.memory.add(session_id, "user", prompt)
@@ -75,12 +105,17 @@ class Agent:
 
                 for tc in tool_calls:
                     fn_name = tc.function.name
-                    fn_args = json.loads(tc.function.arguments)
+                    try:
+                        decoded = json.loads(tc.function.arguments or "{}")
+                    except (TypeError, ValueError):
+                        decoded = None
 
-                    if fn_name in self._tool_map:
-                        result = self._tool_map[fn_name](**fn_args)
+                    if isinstance(decoded, dict):
+                        fn_args = decoded
+                        result = self._call_tool(fn_name, fn_args)
                     else:
-                        result = f"Error: unknown tool '{fn_name}'"
+                        fn_args = {}
+                        result = f"Error: arguments for tool '{fn_name}' are not a JSON object"
 
                     all_tool_calls.append({
                         "name": fn_name,

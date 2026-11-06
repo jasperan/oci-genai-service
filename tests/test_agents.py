@@ -31,6 +31,13 @@ class TestAgent:
         agent = Agent(client=client, model="test", tools=[], system_prompt="Be helpful")
         assert agent.system_prompt == "Be helpful"
 
+    def test_call_tool_rejects_bad_arguments(self):
+        agent = Agent(client=MagicMock(), model="test", tools=[add_numbers])
+        assert agent._call_tool("add_numbers", {"a": 1, "b": 2}) == "3"
+        assert "unknown argument" in agent._call_tool("add_numbers", {"a": 1, "b": 2, "c": 3})
+        assert "missing argument" in agent._call_tool("add_numbers", {"a": 1})
+        assert "unknown tool" in agent._call_tool("nope", {})
+
 
 class TestInMemoryMemory:
     def test_add_and_get_messages(self):
